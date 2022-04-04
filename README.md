@@ -7,6 +7,7 @@ pip install pyyaml --user
 pip install rospkg --user
 pip install defusedxml --user
 pip install netifaces --user
+apt-get install libtinyxml2-dev
 
 #install console_bridge
 git clong git@github.com:ros/console_bridge.git
