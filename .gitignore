@@ -4,5 +4,4 @@ build_isolated
 devel_isolated
 install_isolated
 melodic-ros_comm.rosinstall
-ros_tutorials
 
