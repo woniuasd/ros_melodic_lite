@@ -36,38 +36,35 @@
 #define ROSCPP_ROSOUT_APPENDER_H
 
 #include <ros/message_forward.h>
-#include "common.h"
-
-#include "ros/internal/condition_variable.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 #include <boost/weak_ptr.hpp>
 
-#include <boost/thread.hpp>
+#include "common.h"
+#include "ros/internal/condition_variable.h"
 
-namespace rosgraph_msgs
-{
+namespace rosgraph_msgs {
 ROS_DECLARE_MESSAGE(Log);
 }
 
-namespace ros
-{
+namespace ros {
 
 class Publication;
 typedef boost::shared_ptr<Publication> PublicationPtr;
 typedef boost::weak_ptr<Publication> PublicationWPtr;
 
-class ROSCPP_DECL ROSOutAppender : public ros::console::LogAppender
-{
-public:
+class ROSCPP_DECL ROSOutAppender : public ros::console::LogAppender {
+ public:
   ROSOutAppender();
   ~ROSOutAppender();
 
   const std::string& getLastError() const;
 
-  virtual void log(::ros::console::Level level, const char* str, const char* file, const char* function, int line);
+  virtual void log(::ros::console::Level level, const char* str,
+                   const char* file, const char* function, int line);
 
-protected:
+ protected:
   void logThread();
 
   std::string last_error_;
@@ -82,6 +79,6 @@ protected:
   boost::thread publish_thread_;
 };
 
-} // namespace ros
+}  // namespace ros
 
 #endif

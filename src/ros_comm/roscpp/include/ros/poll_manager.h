@@ -28,26 +28,23 @@
 #ifndef ROSCPP_POLL_MANAGER_H
 #define ROSCPP_POLL_MANAGER_H
 
-#include "forwards.h"
-#include "poll_set.h"
-#include "common.h"
-
 #include <boost/signals2.hpp>
-
 #include <boost/thread/recursive_mutex.hpp>
 #include <boost/thread/thread.hpp>
 
-namespace ros
-{
+#include "common.h"
+#include "forwards.h"
+#include "poll_set.h"
+
+namespace ros {
 
 class PollManager;
 typedef boost::shared_ptr<PollManager> PollManagerPtr;
 typedef boost::signals2::signal<void(void)> VoidSignal;
 typedef boost::function<void(void)> VoidFunc;
 
-class ROSCPP_DECL PollManager
-{
-public:
+class ROSCPP_DECL PollManager {
+ public:
   static const PollManagerPtr& instance();
 
   PollManager();
@@ -60,7 +57,8 @@ public:
 
   void start();
   void shutdown();
-private:
+
+ private:
   void threadFunc();
 
   PollSet poll_set_;
@@ -72,6 +70,6 @@ private:
   boost::thread thread_;
 };
 
-}
+}  // namespace ros
 
 #endif

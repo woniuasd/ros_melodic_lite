@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -26,66 +26,66 @@
  */
 
 #include "ros/service.h"
+
 #include "ros/connection.h"
-#include "ros/service_server_link.h"
-#include "ros/service_manager.h"
-#include "ros/transport/transport_tcp.h"
-#include "ros/poll_manager.h"
+#include "ros/header.h"
 #include "ros/init.h"
 #include "ros/names.h"
+#include "ros/poll_manager.h"
+#include "ros/service_manager.h"
+#include "ros/service_server_link.h"
 #include "ros/this_node.h"
-#include "ros/header.h"
+#include "ros/transport/transport_tcp.h"
 
 using namespace ros;
 
-bool service::exists(const std::string& service_name, bool print_failure_reason)
-{
+bool service::exists(const std::string& service_name,
+                     bool print_failure_reason) {
   std::string mapped_name = names::resolve(service_name);
 
   std::string host;
   uint32_t port;
 
-  if (ServiceManager::instance()->lookupService(mapped_name, host, port))
-  {
-    TransportTCPPtr transport(boost::make_shared<TransportTCP>(static_cast<ros::PollSet*>(NULL), TransportTCP::SYNCHRONOUS));
+  if (ServiceManager::instance()->lookupService(mapped_name, host, port)) {
+    TransportTCPPtr transport(boost::make_shared<TransportTCP>(
+        static_cast<ros::PollSet*>(NULL), TransportTCP::SYNCHRONOUS));
 
-    if (transport->connect(host, port))
-    {
+    if (transport->connect(host, port)) {
       M_string m;
       m["probe"] = "1";
       m["md5sum"] = "*";
       m["callerid"] = this_node::getName();
       m["service"] = mapped_name;
       boost::shared_array<uint8_t> buffer;
-      uint32_t size = 0;;
+      uint32_t size = 0;
+      ;
       Header::write(m, buffer, size);
       transport->write((uint8_t*)&size, sizeof(size));
       transport->write(buffer.get(), size);
       transport->close();
 
       return true;
-    }
-    else
-    {
-      if (print_failure_reason)
-      {
-        ROS_INFO("waitForService: Service [%s] could not connect to host [%s:%d], waiting...", mapped_name.c_str(), host.c_str(), port);
+    } else {
+      if (print_failure_reason) {
+        ROS_INFO(
+            "waitForService: Service [%s] could not connect to host [%s:%d], "
+            "waiting...",
+            mapped_name.c_str(), host.c_str(), port);
       }
     }
-  }
-  else
-  {
-    if (print_failure_reason)
-    {
-      ROS_INFO("waitForService: Service [%s] has not been advertised, waiting...", mapped_name.c_str());
+  } else {
+    if (print_failure_reason) {
+      ROS_INFO(
+          "waitForService: Service [%s] has not been advertised, waiting...",
+          mapped_name.c_str());
     }
   }
 
   return false;
 }
 
-bool service::waitForService(const std::string& service_name, ros::Duration timeout)
-{
+bool service::waitForService(const std::string& service_name,
+                             ros::Duration timeout) {
   std::string mapped_name = names::resolve(service_name);
 
   const WallTime start_time = WallTime::now();
@@ -93,23 +93,17 @@ bool service::waitForService(const std::string& service_name, ros::Duration time
 
   bool printed = false;
   bool result = false;
-  while (ros::ok())
-  {
-    if (exists(service_name, !printed))
-    {
+  while (ros::ok()) {
+    if (exists(service_name, !printed)) {
       result = true;
       break;
-    }
-    else
-    {
+    } else {
       printed = true;
 
-      if (wall_timeout >= WallDuration(0))
-      {
+      if (wall_timeout >= WallDuration(0)) {
         const WallTime current_time = WallTime::now();
 
-        if ((current_time - start_time) >= wall_timeout)
-        {
+        if ((current_time - start_time) >= wall_timeout) {
           return false;
         }
       }
@@ -118,15 +112,14 @@ bool service::waitForService(const std::string& service_name, ros::Duration time
     }
   }
 
-  if (printed && ros::ok())
-  {
-    ROS_INFO("waitForService: Service [%s] is now available.", mapped_name.c_str());
+  if (printed && ros::ok()) {
+    ROS_INFO("waitForService: Service [%s] is now available.",
+             mapped_name.c_str());
   }
 
   return result;
 }
 
-bool service::waitForService(const std::string& service_name, int32_t timeout)
-{
+bool service::waitForService(const std::string& service_name, int32_t timeout) {
   return waitForService(service_name, ros::Duration(timeout / 1000.0));
 }

@@ -33,33 +33,29 @@
  */
 
 #include "ros/topic.h"
+
 #include "ros/callback_queue.h"
 
-namespace ros
-{
-namespace topic
-{
+namespace ros {
+namespace topic {
 
-void waitForMessageImpl(SubscribeOptions& ops, 
-			const boost::function<bool(void)>& ready_pred, 
-			NodeHandle& nh, ros::Duration timeout)
-{
+void waitForMessageImpl(SubscribeOptions& ops,
+                        const boost::function<bool(void)>& ready_pred,
+                        NodeHandle& nh, ros::Duration timeout) {
   ros::CallbackQueue queue;
   ops.callback_queue = &queue;
 
   ros::Subscriber sub = nh.subscribe(ops);
 
   ros::Time end = ros::Time::now() + timeout;
-  while (!ready_pred() && nh.ok())
-  {
+  while (!ready_pred() && nh.ok()) {
     queue.callAvailable(ros::WallDuration(0.1));
 
-    if (!timeout.isZero() && ros::Time::now() >= end)
-    {
+    if (!timeout.isZero() && ros::Time::now() >= end) {
       return;
     }
   }
 }
 
-} // namespace topic
-} // namespace ros
+}  // namespace topic
+}  // namespace ros

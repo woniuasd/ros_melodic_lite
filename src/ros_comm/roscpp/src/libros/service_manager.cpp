@@ -25,78 +25,68 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdio>
 #include "ros/service_manager.h"
-#include "ros/xmlrpc_manager.h"
-#include "ros/connection_manager.h"
-#include "ros/poll_manager.h"
-#include "ros/service_publication.h"
-#include "ros/service_client_link.h"
-#include "ros/service_server_link.h"
-#include "ros/this_node.h"
-#include "ros/network.h"
-#include "ros/master.h"
-#include "ros/transport/transport_tcp.h"
-#include "ros/transport/transport_udp.h"
-#include "ros/init.h"
-#include "ros/connection.h"
-#include "ros/file_log.h"
-
-#include "xmlrpcpp/XmlRpc.h"
 
 #include <ros/console.h>
 
-using namespace XmlRpc; // A battle to be fought later
-using namespace std; // sigh
+#include <cstdio>
 
-namespace ros
-{
+#include "ros/connection.h"
+#include "ros/connection_manager.h"
+#include "ros/file_log.h"
+#include "ros/init.h"
+#include "ros/master.h"
+#include "ros/network.h"
+#include "ros/poll_manager.h"
+#include "ros/service_client_link.h"
+#include "ros/service_publication.h"
+#include "ros/service_server_link.h"
+#include "ros/this_node.h"
+#include "ros/transport/transport_tcp.h"
+#include "ros/transport/transport_udp.h"
+#include "ros/xmlrpc_manager.h"
+#include "xmlrpcpp/XmlRpc.h"
 
-const ServiceManagerPtr& ServiceManager::instance()
-{
-  static ServiceManagerPtr service_manager = boost::make_shared<ServiceManager>();
+using namespace XmlRpc;  // A battle to be fought later
+using namespace std;     // sigh
+
+namespace ros {
+
+const ServiceManagerPtr& ServiceManager::instance() {
+  static ServiceManagerPtr service_manager =
+      boost::make_shared<ServiceManager>();
   return service_manager;
 }
 
-ServiceManager::ServiceManager()
-: shutting_down_(false)
-{
-}
+ServiceManager::ServiceManager() : shutting_down_(false) {}
 
-ServiceManager::~ServiceManager()
-{
-  shutdown();
-}
+ServiceManager::~ServiceManager() { shutdown(); }
 
-void ServiceManager::start()
-{
+void ServiceManager::start() {
   shutting_down_ = false;
 
   poll_manager_ = PollManager::instance();
   connection_manager_ = ConnectionManager::instance();
   xmlrpc_manager_ = XMLRPCManager::instance();
-
 }
 
-void ServiceManager::shutdown()
-{
+void ServiceManager::shutdown() {
   boost::recursive_mutex::scoped_lock shutdown_lock(shutting_down_mutex_);
-  if (shutting_down_)
-  {
+  if (shutting_down_) {
     return;
   }
 
   shutting_down_ = true;
 
-  ROSCPP_LOG_DEBUG("ServiceManager::shutdown(): unregistering our advertised services");
+  ROSCPP_LOG_DEBUG(
+      "ServiceManager::shutdown(): unregistering our advertised services");
   {
     boost::mutex::scoped_lock ss_lock(service_publications_mutex_);
 
     for (L_ServicePublication::iterator i = service_publications_.begin();
-         i != service_publications_.end(); ++i)
-    {
+         i != service_publications_.end(); ++i) {
       unregisterService((*i)->getName());
-      //ROSCPP_LOG_DEBUG( "shutting down service %s", (*i)->getName().c_str());
+      // ROSCPP_LOG_DEBUG( "shutting down service %s", (*i)->getName().c_str());
       (*i)->drop();
     }
     service_publications_.clear();
@@ -111,34 +101,34 @@ void ServiceManager::shutdown()
   {
     L_ServiceServerLink::iterator it = local_service_clients.begin();
     L_ServiceServerLink::iterator end = local_service_clients.end();
-    for (; it != end; ++it)
-    {
+    for (; it != end; ++it) {
       (*it)->getConnection()->drop(Connection::Destructing);
     }
 
     local_service_clients.clear();
   }
-
 }
 
-bool ServiceManager::advertiseService(const AdvertiseServiceOptions& ops)
-{
+bool ServiceManager::advertiseService(const AdvertiseServiceOptions& ops) {
   boost::recursive_mutex::scoped_lock shutdown_lock(shutting_down_mutex_);
-  if (shutting_down_)
-  {
+  if (shutting_down_) {
     return false;
   }
 
   {
     boost::mutex::scoped_lock lock(service_publications_mutex_);
 
-    if (isServiceAdvertised(ops.service))
-    {
-      ROS_ERROR("Tried to advertise a service that is already advertised in this node [%s]", ops.service.c_str());
+    if (isServiceAdvertised(ops.service)) {
+      ROS_ERROR(
+          "Tried to advertise a service that is already advertised in this "
+          "node [%s]",
+          ops.service.c_str());
       return false;
     }
 
-    ServicePublicationPtr pub(boost::make_shared<ServicePublication>(ops.service, ops.md5sum, ops.datatype, ops.req_datatype, ops.res_datatype, ops.helper, ops.callback_queue, ops.tracked_object));
+    ServicePublicationPtr pub(boost::make_shared<ServicePublication>(
+        ops.service, ops.md5sum, ops.datatype, ops.req_datatype,
+        ops.res_datatype, ops.helper, ops.callback_queue, ops.tracked_object));
     service_publications_.push_back(pub);
   }
 
@@ -147,7 +137,7 @@ bool ServiceManager::advertiseService(const AdvertiseServiceOptions& ops)
   args[1] = ops.service;
   char uri_buf[1024];
   std::snprintf(uri_buf, sizeof(uri_buf), "rosrpc://%s:%d",
-           network::getHost().c_str(), connection_manager_->getTCPPort());
+                network::getHost().c_str(), connection_manager_->getTCPPort());
   args[2] = string(uri_buf);
   args[3] = xmlrpc_manager_->getServerURI();
   master::execute("registerService", args, result, payload, true);
@@ -155,11 +145,9 @@ bool ServiceManager::advertiseService(const AdvertiseServiceOptions& ops)
   return true;
 }
 
-bool ServiceManager::unadvertiseService(const string &serv_name)
-{
+bool ServiceManager::unadvertiseService(const string& serv_name) {
   boost::recursive_mutex::scoped_lock shutdown_lock(shutting_down_mutex_);
-  if (shutting_down_)
-  {
+  if (shutting_down_) {
     return false;
   }
 
@@ -168,10 +156,8 @@ bool ServiceManager::unadvertiseService(const string &serv_name)
     boost::mutex::scoped_lock lock(service_publications_mutex_);
 
     for (L_ServicePublication::iterator i = service_publications_.begin();
-         i != service_publications_.end(); ++i)
-    {
-      if((*i)->getName() == serv_name && !(*i)->isDropped())
-      {
+         i != service_publications_.end(); ++i) {
+      if ((*i)->getName() == serv_name && !(*i)->isDropped()) {
         pub = *i;
         service_publications_.erase(i);
         break;
@@ -179,10 +165,9 @@ bool ServiceManager::unadvertiseService(const string &serv_name)
     }
   }
 
-  if (pub)
-  {
+  if (pub) {
     unregisterService(pub->getName());
-    ROSCPP_LOG_DEBUG( "shutting down service [%s]", pub->getName().c_str());
+    ROSCPP_LOG_DEBUG("shutting down service [%s]", pub->getName().c_str());
     pub->drop();
     return true;
   }
@@ -190,25 +175,22 @@ bool ServiceManager::unadvertiseService(const string &serv_name)
   return false;
 }
 
-bool ServiceManager::unregisterService(const std::string& service)
-{
+bool ServiceManager::unregisterService(const std::string& service) {
   XmlRpcValue args, result, payload;
   args[0] = this_node::getName();
   args[1] = service;
   char uri_buf[1024];
   std::snprintf(uri_buf, sizeof(uri_buf), "rosrpc://%s:%d",
-           network::getHost().c_str(), connection_manager_->getTCPPort());
+                network::getHost().c_str(), connection_manager_->getTCPPort());
   args[2] = string(uri_buf);
 
   return master::execute("unregisterService", args, result, payload, false);
 }
 
-bool ServiceManager::isServiceAdvertised(const string& serv_name)
-{
-  for (L_ServicePublication::iterator s = service_publications_.begin(); s != service_publications_.end(); ++s)
-  {
-    if (((*s)->getName() == serv_name) && !(*s)->isDropped())
-    {
+bool ServiceManager::isServiceAdvertised(const string& serv_name) {
+  for (L_ServicePublication::iterator s = service_publications_.begin();
+       s != service_publications_.end(); ++s) {
+    if (((*s)->getName() == serv_name) && !(*s)->isDropped()) {
       return true;
     }
   }
@@ -216,15 +198,13 @@ bool ServiceManager::isServiceAdvertised(const string& serv_name)
   return false;
 }
 
-ServicePublicationPtr ServiceManager::lookupServicePublication(const std::string& service)
-{
+ServicePublicationPtr ServiceManager::lookupServicePublication(
+    const std::string& service) {
   boost::mutex::scoped_lock lock(service_publications_mutex_);
 
   for (L_ServicePublication::iterator t = service_publications_.begin();
-       t != service_publications_.end(); ++t)
-  {
-    if ((*t)->getName() == service)
-    {
+       t != service_publications_.end(); ++t) {
+    if ((*t)->getName() == service) {
       return *t;
     }
   }
@@ -232,25 +212,23 @@ ServicePublicationPtr ServiceManager::lookupServicePublication(const std::string
   return ServicePublicationPtr();
 }
 
-ServiceServerLinkPtr ServiceManager::createServiceServerLink(const std::string& service, bool persistent,
-                                             const std::string& request_md5sum, const std::string& response_md5sum,
-                                             const M_string& header_values)
-{
-
+ServiceServerLinkPtr ServiceManager::createServiceServerLink(
+    const std::string& service, bool persistent,
+    const std::string& request_md5sum, const std::string& response_md5sum,
+    const M_string& header_values) {
   boost::recursive_mutex::scoped_lock shutdown_lock(shutting_down_mutex_);
-  if (shutting_down_)
-  {
+  if (shutting_down_) {
     return ServiceServerLinkPtr();
   }
 
   uint32_t serv_port;
   std::string serv_host;
-  if (!lookupService(service, serv_host, serv_port))
-  {
+  if (!lookupService(service, serv_host, serv_port)) {
     return ServiceServerLinkPtr();
   }
 
-  TransportTCPPtr transport(boost::make_shared<TransportTCP>(&poll_manager_->getPollSet()));
+  TransportTCPPtr transport(
+      boost::make_shared<TransportTCP>(&poll_manager_->getPollSet()));
 
   // Make sure to initialize the connection *before* transport->connect()
   // is called, otherwise we might miss a connect error (see #434).
@@ -258,9 +236,9 @@ ServiceServerLinkPtr ServiceManager::createServiceServerLink(const std::string& 
   connection_manager_->addConnection(connection);
   connection->initialize(transport, false, HeaderReceivedFunc());
 
-  if (transport->connect(serv_host, serv_port))
-  {
-    ServiceServerLinkPtr client(boost::make_shared<ServiceServerLink>(service, persistent, request_md5sum, response_md5sum, header_values));
+  if (transport->connect(serv_host, serv_port)) {
+    ServiceServerLinkPtr client(boost::make_shared<ServiceServerLink>(
+        service, persistent, request_md5sum, response_md5sum, header_values));
 
     {
       boost::mutex::scoped_lock lock(service_server_links_mutex_);
@@ -272,37 +250,38 @@ ServiceServerLinkPtr ServiceManager::createServiceServerLink(const std::string& 
     return client;
   }
 
-  ROSCPP_LOG_DEBUG("Failed to connect to service [%s] (mapped=[%s]) at [%s:%d]", service.c_str(), service.c_str(), serv_host.c_str(), serv_port);
+  ROSCPP_LOG_DEBUG("Failed to connect to service [%s] (mapped=[%s]) at [%s:%d]",
+                   service.c_str(), service.c_str(), serv_host.c_str(),
+                   serv_port);
 
   return ServiceServerLinkPtr();
 }
 
-void ServiceManager::removeServiceServerLink(const ServiceServerLinkPtr& client)
-{
-  // Guard against this getting called as a result of shutdown() dropping all connections (where shutting_down_mutex_ is already locked)
-  if (shutting_down_)
-  {
+void ServiceManager::removeServiceServerLink(
+    const ServiceServerLinkPtr& client) {
+  // Guard against this getting called as a result of shutdown() dropping all
+  // connections (where shutting_down_mutex_ is already locked)
+  if (shutting_down_) {
     return;
   }
 
   boost::recursive_mutex::scoped_lock shutdown_lock(shutting_down_mutex_);
   // Now check again, since the state may have changed between pre-lock/now
-  if (shutting_down_)
-  {
+  if (shutting_down_) {
     return;
   }
 
   boost::mutex::scoped_lock lock(service_server_links_mutex_);
 
-  L_ServiceServerLink::iterator it = std::find(service_server_links_.begin(), service_server_links_.end(), client);
-  if (it != service_server_links_.end())
-  {
+  L_ServiceServerLink::iterator it = std::find(
+      service_server_links_.begin(), service_server_links_.end(), client);
+  if (it != service_server_links_.end()) {
     service_server_links_.erase(it);
   }
 }
 
-bool ServiceManager::lookupService(const string &name, string &serv_host, uint32_t &serv_port)
-{
+bool ServiceManager::lookupService(const string& name, string& serv_host,
+                                   uint32_t& serv_port) {
   XmlRpcValue args, result, payload;
   args[0] = this_node::getName();
   args[1] = name;
@@ -310,15 +289,14 @@ bool ServiceManager::lookupService(const string &name, string &serv_host, uint32
     return false;
 
   string serv_uri(payload);
-  if (!serv_uri.length()) // shouldn't happen. but let's be sure.
+  if (!serv_uri.length())  // shouldn't happen. but let's be sure.
   {
     ROS_ERROR("lookupService: Empty server URI returned from master");
 
     return false;
   }
 
-  if (!network::splitURI(serv_uri, serv_host, serv_port))
-  {
+  if (!network::splitURI(serv_uri, serv_host, serv_port)) {
     ROS_ERROR("lookupService: Bad service uri [%s]", serv_uri.c_str());
 
     return false;
@@ -327,5 +305,4 @@ bool ServiceManager::lookupService(const string &name, string &serv_host, uint32
   return true;
 }
 
-} // namespace ros
-
+}  // namespace ros

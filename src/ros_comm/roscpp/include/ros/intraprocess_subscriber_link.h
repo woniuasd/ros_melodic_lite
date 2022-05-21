@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,43 +27,46 @@
 
 #ifndef ROSCPP_INTRAPROCESS_SUBSCRIBER_LINK_H
 #define ROSCPP_INTRAPROCESS_SUBSCRIBER_LINK_H
-#include "subscriber_link.h"
-#include "common.h"
-
 #include <boost/thread/recursive_mutex.hpp>
 
-namespace ros
-{
+#include "common.h"
+#include "subscriber_link.h"
+
+namespace ros {
 
 class IntraProcessPublisherLink;
-typedef boost::shared_ptr<IntraProcessPublisherLink> IntraProcessPublisherLinkPtr;
+typedef boost::shared_ptr<IntraProcessPublisherLink>
+    IntraProcessPublisherLinkPtr;
 
 /**
- * \brief SubscriberLink handles broadcasting messages to a single subscriber on a single topic
+ * \brief SubscriberLink handles broadcasting messages to a single subscriber on
+ * a single topic
  */
-class ROSCPP_DECL IntraProcessSubscriberLink : public SubscriberLink
-{
-public:
+class ROSCPP_DECL IntraProcessSubscriberLink : public SubscriberLink {
+ public:
   IntraProcessSubscriberLink(const PublicationPtr& parent);
   virtual ~IntraProcessSubscriberLink();
 
   void setSubscriber(const IntraProcessPublisherLinkPtr& subscriber);
   bool isLatching();
 
-  virtual void enqueueMessage(const SerializedMessage& m, bool ser, bool nocopy);
+  virtual void enqueueMessage(const SerializedMessage& m, bool ser,
+                              bool nocopy);
   virtual void drop();
   virtual std::string getTransportType();
   virtual std::string getTransportInfo();
   virtual bool isIntraprocess() { return true; }
-  virtual void getPublishTypes(bool& ser, bool& nocopy, const std::type_info& ti);
+  virtual void getPublishTypes(bool& ser, bool& nocopy,
+                               const std::type_info& ti);
 
-private:
+ private:
   IntraProcessPublisherLinkPtr subscriber_;
   bool dropped_;
   boost::recursive_mutex drop_mutex_;
 };
-typedef boost::shared_ptr<IntraProcessSubscriberLink> IntraProcessSubscriberLinkPtr;
+typedef boost::shared_ptr<IntraProcessSubscriberLink>
+    IntraProcessSubscriberLinkPtr;
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_INTRAPROCESS_SUBSCRIBER_LINK_H
+#endif  // ROSCPP_INTRAPROCESS_SUBSCRIBER_LINK_H

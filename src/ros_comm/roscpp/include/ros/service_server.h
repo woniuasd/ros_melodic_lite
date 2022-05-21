@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,23 +28,21 @@
 #ifndef ROSCPP_SERVICE_HANDLE_H
 #define ROSCPP_SERVICE_HANDLE_H
 
-#include "ros/forwards.h"
 #include "common.h"
+#include "ros/forwards.h"
 
-namespace ros
-{
+namespace ros {
 
 /**
  * \brief Manages an service advertisement.
  *
- * A ServiceServer should always be created through a call to NodeHandle::advertiseService(), or copied from
- * one that was.  Once all copies of a specific
- * ServiceServer go out of scope, the service associated with it will be unadvertised and the service callback
- * will stop being called.
+ * A ServiceServer should always be created through a call to
+ * NodeHandle::advertiseService(), or copied from one that was.  Once all copies
+ * of a specific ServiceServer go out of scope, the service associated with it
+ * will be unadvertised and the service callback will stop being called.
  */
-class ROSCPP_DECL ServiceServer
-{
-public:
+class ROSCPP_DECL ServiceServer {
+ public:
   ServiceServer() {}
   ServiceServer(const ServiceServer& rhs);
   ~ServiceServer();
@@ -53,39 +51,31 @@ public:
   /**
    * \brief Unadvertise the service associated with this ServiceServer
    *
-   * This method usually does not need to be explicitly called, as automatic shutdown happens when
-   * all copies of this ServiceServer go out of scope
+   * This method usually does not need to be explicitly called, as automatic
+   * shutdown happens when all copies of this ServiceServer go out of scope
    *
-   * This method overrides the automatic reference counted unadvertise, and immediately
-   * unadvertises the service associated with this ServiceServer
+   * This method overrides the automatic reference counted unadvertise, and
+   * immediately unadvertises the service associated with this ServiceServer
    */
   void shutdown();
 
   std::string getService() const;
 
-  operator void*() const { return (impl_ && impl_->isValid()) ? (void*)1 : (void*)0; }
-
-  bool operator<(const ServiceServer& rhs) const
-  {
-    return impl_ < rhs.impl_;
+  operator void*() const {
+    return (impl_ && impl_->isValid()) ? (void*)1 : (void*)0;
   }
 
-  bool operator==(const ServiceServer& rhs) const
-  {
-    return impl_ == rhs.impl_;
-  }
+  bool operator<(const ServiceServer& rhs) const { return impl_ < rhs.impl_; }
 
-  bool operator!=(const ServiceServer& rhs) const
-  {
-    return impl_ != rhs.impl_;
-  }
+  bool operator==(const ServiceServer& rhs) const { return impl_ == rhs.impl_; }
 
-private:
+  bool operator!=(const ServiceServer& rhs) const { return impl_ != rhs.impl_; }
+
+ private:
   ServiceServer(const std::string& service, const NodeHandle& node_handle);
 
-  class Impl
-  {
-  public:
+  class Impl {
+   public:
     Impl();
     ~Impl();
 
@@ -106,8 +96,6 @@ private:
 };
 typedef std::vector<ServiceServer> V_ServiceServer;
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_SERVICE_HANDLE_H
-
-
+#endif  // ROSCPP_SERVICE_HANDLE_H

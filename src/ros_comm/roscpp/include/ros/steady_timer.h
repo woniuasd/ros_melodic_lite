@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,20 +32,18 @@
 #include "forwards.h"
 #include "steady_timer_options.h"
 
-namespace ros
-{
+namespace ros {
 
 /**
  * \brief Manages a steady-clock timer callback
  *
- * A SteadyTimer should always be created through a call to NodeHandle::createSteadyTimer(), or copied from one
- * that was. Once all copies of a specific
- * SteadyTimer go out of scope, the callback associated with that handle will stop
- * being called.
+ * A SteadyTimer should always be created through a call to
+ * NodeHandle::createSteadyTimer(), or copied from one that was. Once all copies
+ * of a specific SteadyTimer go out of scope, the callback associated with that
+ * handle will stop being called.
  */
-class ROSCPP_DECL SteadyTimer
-{
-public:
+class ROSCPP_DECL SteadyTimer {
+ public:
   SteadyTimer() {}
   SteadyTimer(const SteadyTimer& rhs);
   ~SteadyTimer();
@@ -56,8 +54,8 @@ public:
    */
   void start();
   /**
-   * \brief Stop the timer.  Once this call returns, no more callbacks will be called.  Does
-   * nothing if the timer is already stopped.
+   * \brief Stop the timer.  Once this call returns, no more callbacks will be
+   * called.  Does nothing if the timer is already stopped.
    */
   void stop();
 
@@ -68,42 +66,33 @@ public:
 
   /**
    * \brief Set the period of this timer
-   * \param reset Whether to reset the timer. If true, timer ignores elapsed time and next cb occurs at now()+period
+   * \param reset Whether to reset the timer. If true, timer ignores elapsed
+   * time and next cb occurs at now()+period
    */
-  void setPeriod(const WallDuration& period, bool reset=true);
+  void setPeriod(const WallDuration& period, bool reset = true);
 
   bool hasStarted() const { return impl_ && impl_->hasStarted(); }
   bool isValid() { return impl_ && impl_->isValid(); }
-  operator void*() { return isValid() ? (void *) 1 : (void *) 0; }
+  operator void*() { return isValid() ? (void*)1 : (void*)0; }
 
-  bool operator<(const SteadyTimer& rhs)
-  {
-    return impl_ < rhs.impl_;
-  }
+  bool operator<(const SteadyTimer& rhs) { return impl_ < rhs.impl_; }
 
-  bool operator==(const SteadyTimer& rhs)
-  {
-    return impl_ == rhs.impl_;
-  }
+  bool operator==(const SteadyTimer& rhs) { return impl_ == rhs.impl_; }
 
-  bool operator!=(const SteadyTimer& rhs)
-  {
-    return impl_ != rhs.impl_;
-  }
+  bool operator!=(const SteadyTimer& rhs) { return impl_ != rhs.impl_; }
 
-private:
+ private:
   SteadyTimer(const SteadyTimerOptions& ops);
 
-  class Impl
-  {
-  public:
+  class Impl {
+   public:
     Impl();
     ~Impl();
 
     bool hasStarted() const;
     bool isValid();
     bool hasPending();
-    void setPeriod(const WallDuration &period, bool reset=true);
+    void setPeriod(const WallDuration& period, bool reset = true);
 
     void start();
     void stop();
@@ -113,7 +102,7 @@ private:
 
     WallDuration period_;
     SteadyTimerCallback callback_;
-    CallbackQueueInterface *callback_queue_;
+    CallbackQueueInterface* callback_queue_;
     VoidConstWPtr tracked_object_;
     bool has_tracked_object_;
     bool oneshot_;
@@ -126,6 +115,6 @@ private:
   friend class NodeHandle;
 };
 
-}
+}  // namespace ros
 
 #endif

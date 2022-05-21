@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,19 +28,18 @@
 #ifndef ROSCPP_PUBLISHER_LINK_H
 #define ROSCPP_PUBLISHER_LINK_H
 
-#include "ros/common.h"
-#include "ros/transport_hints.h"
-#include "ros/header.h"
-#include "common.h"
-#include <boost/thread/mutex.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/weak_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
-
+#include <boost/shared_array.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/weak_ptr.hpp>
 #include <queue>
 
-namespace ros
-{
+#include "common.h"
+#include "ros/common.h"
+#include "ros/header.h"
+#include "ros/transport_hints.h"
+
+namespace ros {
 class Header;
 class Message;
 class Subscription;
@@ -50,25 +49,23 @@ class Connection;
 typedef boost::shared_ptr<Connection> ConnectionPtr;
 
 /**
- * \brief Handles a connection to a single publisher on a given topic.  Receives messages from a publisher
- * and hands them off to its parent Subscription
+ * \brief Handles a connection to a single publisher on a given topic.  Receives
+ * messages from a publisher and hands them off to its parent Subscription
  */
-class ROSCPP_DECL PublisherLink : public boost::enable_shared_from_this<PublisherLink>
-{
-public:
-  class Stats
-  {
-  public:
+class ROSCPP_DECL PublisherLink
+    : public boost::enable_shared_from_this<PublisherLink> {
+ public:
+  class Stats {
+   public:
     uint64_t bytes_received_, messages_received_, drops_;
-    Stats()
-    : bytes_received_(0), messages_received_(0), drops_(0) { }
+    Stats() : bytes_received_(0), messages_received_(0), drops_(0) {}
   };
 
-
-  PublisherLink(const SubscriptionPtr& parent, const std::string& xmlrpc_uri, const TransportHints& transport_hints);
+  PublisherLink(const SubscriptionPtr& parent, const std::string& xmlrpc_uri,
+                const TransportHints& transport_hints);
   virtual ~PublisherLink();
 
-  const Stats &getStats() { return stats_; }
+  const Stats& getStats() { return stats_; }
   const std::string& getPublisherXMLRPCURI();
   int getConnectionID() const { return connection_id_; }
   const std::string& getCallerID() { return caller_id_; }
@@ -77,16 +74,18 @@ public:
   bool setHeader(const Header& header);
 
   /**
-   * \brief Handles handing off a received message to the subscription, where it will be deserialized and called back
+   * \brief Handles handing off a received message to the subscription, where it
+   * will be deserialized and called back
    */
-  virtual void handleMessage(const SerializedMessage& m, bool ser, bool nocopy) = 0;
+  virtual void handleMessage(const SerializedMessage& m, bool ser,
+                             bool nocopy) = 0;
   virtual std::string getTransportType() = 0;
   virtual std::string getTransportInfo() = 0;
   virtual void drop() = 0;
 
   const std::string& getMD5Sum();
 
-protected:
+ protected:
   SubscriptionWPtr parent_;
   unsigned int connection_id_;
   std::string publisher_xmlrpc_uri_;
@@ -101,9 +100,6 @@ protected:
   std::string md5sum_;
 };
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_PUBLISHER_LINK_H
-
-
-
+#endif  // ROSCPP_PUBLISHER_LINK_H

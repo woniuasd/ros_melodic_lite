@@ -26,50 +26,42 @@
  */
 
 #include "ros/master.h"
-#include "ros/xmlrpc_manager.h"
-#include "ros/this_node.h"
+
+#include <ros/assert.h>
+#include <ros/console.h>
+
 #include "ros/init.h"
 #include "ros/network.h"
-
-#include <ros/console.h>
-#include <ros/assert.h>
-
+#include "ros/this_node.h"
+#include "ros/xmlrpc_manager.h"
 #include "xmlrpcpp/XmlRpc.h"
 
-namespace ros
-{
+namespace ros {
 
-namespace master
-{
+namespace master {
 
 uint32_t g_port = 0;
 std::string g_host;
 std::string g_uri;
 ros::WallDuration g_retry_timeout;
 
-void init(const M_string& remappings)
-{
+void init(const M_string& remappings) {
   M_string::const_iterator it = remappings.find("__master");
-  if (it != remappings.end())
-  {
+  if (it != remappings.end()) {
     g_uri = it->second;
   }
 
-  if (g_uri.empty())
-  {
-    char *master_uri_env = NULL;
-    #ifdef _MSC_VER
-      _dupenv_s(&master_uri_env, NULL, "ROS_MASTER_URI");
-    #else
-      master_uri_env = getenv("ROS_MASTER_URI");
-    #endif
+  if (g_uri.empty()) {
+    char* master_uri_env = NULL;
+#ifdef _MSC_VER
+    _dupenv_s(&master_uri_env, NULL, "ROS_MASTER_URI");
+#else
+    master_uri_env = getenv("ROS_MASTER_URI");
+#endif
 
-    if (master_uri_env)
-    {
+    if (master_uri_env) {
       g_uri = master_uri_env;
-    }
-    else
-    {
+    } else {
       g_uri = ros::getDefaultMasterURI();
     }
 
@@ -80,83 +72,64 @@ void init(const M_string& remappings)
   }
 
   // Split URI into
-  if (!network::splitURI(g_uri, g_host, g_port))
-  {
-    ROS_FATAL( "Couldn't parse the master URI [%s] into a host:port pair.", g_uri.c_str());
+  if (!network::splitURI(g_uri, g_host, g_port)) {
+    ROS_FATAL("Couldn't parse the master URI [%s] into a host:port pair.",
+              g_uri.c_str());
     ROS_BREAK();
   }
 }
 
-const std::string& getHost()
-{
-  return g_host;
-}
+const std::string& getHost() { return g_host; }
 
-uint32_t getPort()
-{
-  return g_port;
-}
+uint32_t getPort() { return g_port; }
 
-const std::string& getURI()
-{
-  return g_uri;
-}
+const std::string& getURI() { return g_uri; }
 
-void setRetryTimeout(ros::WallDuration timeout)
-{
-  if (timeout < ros::WallDuration(0))
-  {
+void setRetryTimeout(ros::WallDuration timeout) {
+  if (timeout < ros::WallDuration(0)) {
     ROS_FATAL("retry timeout must not be negative.");
     ROS_BREAK();
   }
   g_retry_timeout = timeout;
 }
 
-bool check()
-{
+bool check() {
   XmlRpc::XmlRpcValue args, result, payload;
   args[0] = this_node::getName();
   return execute("getPid", args, result, payload, false);
 }
 
-bool getTopics(V_TopicInfo& topics)
-{
+bool getTopics(V_TopicInfo& topics) {
   XmlRpc::XmlRpcValue args, result, payload;
   args[0] = this_node::getName();
-  args[1] = ""; //TODO: Fix this
+  args[1] = "";  // TODO: Fix this
 
-  if (!execute("getPublishedTopics", args, result, payload, true))
-  {
+  if (!execute("getPublishedTopics", args, result, payload, true)) {
     return false;
   }
 
   topics.clear();
-  for (int i = 0; i < payload.size(); i++)
-  {
-    topics.push_back(TopicInfo(std::string(payload[i][0]), std::string(payload[i][1])));
+  for (int i = 0; i < payload.size(); i++) {
+    topics.push_back(
+        TopicInfo(std::string(payload[i][0]), std::string(payload[i][1])));
   }
 
   return true;
 }
 
-bool getNodes(V_string& nodes)
-{
+bool getNodes(V_string& nodes) {
   XmlRpc::XmlRpcValue args, result, payload;
   args[0] = this_node::getName();
 
-  if (!execute("getSystemState", args, result, payload, true))
-  {
+  if (!execute("getSystemState", args, result, payload, true)) {
     return false;
   }
 
   S_string node_set;
-  for (int i = 0; i < payload.size(); ++i)
-  {
-    for (int j = 0; j < payload[i].size(); ++j)
-    {
+  for (int i = 0; i < payload.size(); ++i) {
+    for (int j = 0; j < payload[i].size(); ++j) {
       XmlRpc::XmlRpcValue val = payload[i][j][1];
-      for (int k = 0; k < val.size(); ++k)
-      {
+      for (int k = 0; k < val.size(); ++k) {
         std::string name = payload[i][j][1][k];
         node_set.insert(name);
       }
@@ -172,19 +145,20 @@ bool getNodes(V_string& nodes)
 boost::mutex g_xmlrpc_call_mutex;
 #endif
 
-bool execute(const std::string& method, const XmlRpc::XmlRpcValue& request, XmlRpc::XmlRpcValue& response, XmlRpc::XmlRpcValue& payload, bool wait_for_master)
-{
+bool execute(const std::string& method, const XmlRpc::XmlRpcValue& request,
+             XmlRpc::XmlRpcValue& response, XmlRpc::XmlRpcValue& payload,
+             bool wait_for_master) {
   ros::SteadyTime start_time = ros::SteadyTime::now();
 
   std::string master_host = getHost();
   uint32_t master_port = getPort();
-  XmlRpc::XmlRpcClient *c = XMLRPCManager::instance()->getXMLRPCClient(master_host, master_port, "/");
+  XmlRpc::XmlRpcClient* c =
+      XMLRPCManager::instance()->getXMLRPCClient(master_host, master_port, "/");
   bool printed = false;
   bool slept = false;
   bool ok = true;
   bool b = false;
-  do
-  {
+  do {
     {
 #if defined(__APPLE__)
       boost::mutex::scoped_lock lock(g_xmlrpc_call_mutex);
@@ -195,34 +169,33 @@ bool execute(const std::string& method, const XmlRpc::XmlRpcValue& request, XmlR
 
     ok = !ros::isShuttingDown() && !XMLRPCManager::instance()->isShuttingDown();
 
-    if (!b && ok)
-    {
-      if (!printed && wait_for_master)
-      {
-        ROS_ERROR("[%s] Failed to contact master at [%s:%d].  %s", method.c_str(), master_host.c_str(), master_port, wait_for_master ? "Retrying..." : "");
+    if (!b && ok) {
+      if (!printed && wait_for_master) {
+        ROS_ERROR("[%s] Failed to contact master at [%s:%d].  %s",
+                  method.c_str(), master_host.c_str(), master_port,
+                  wait_for_master ? "Retrying..." : "");
         printed = true;
       }
 
-      if (!wait_for_master)
-      {
+      if (!wait_for_master) {
         XMLRPCManager::instance()->releaseXMLRPCClient(c);
         return false;
       }
 
-      if (!g_retry_timeout.isZero() && (ros::SteadyTime::now() - start_time) >= g_retry_timeout)
-      {
-        ROS_ERROR("[%s] Timed out trying to connect to the master after [%f] seconds", method.c_str(), g_retry_timeout.toSec());
+      if (!g_retry_timeout.isZero() &&
+          (ros::SteadyTime::now() - start_time) >= g_retry_timeout) {
+        ROS_ERROR(
+            "[%s] Timed out trying to connect to the master after [%f] seconds",
+            method.c_str(), g_retry_timeout.toSec());
         XMLRPCManager::instance()->releaseXMLRPCClient(c);
         return false;
       }
 
       ros::WallDuration(0.05).sleep();
       slept = true;
-    }
-    else
-    {
-      if (!XMLRPCManager::instance()->validateXmlrpcResponse(method, response, payload))
-      {
+    } else {
+      if (!XMLRPCManager::instance()->validateXmlrpcResponse(method, response,
+                                                             payload)) {
         XMLRPCManager::instance()->releaseXMLRPCClient(c);
 
         return false;
@@ -232,11 +205,11 @@ bool execute(const std::string& method, const XmlRpc::XmlRpcValue& request, XmlR
     }
 
     ok = !ros::isShuttingDown() && !XMLRPCManager::instance()->isShuttingDown();
-  } while(ok);
+  } while (ok);
 
-  if (ok && slept)
-  {
-    ROS_INFO("Connected to master at [%s:%d]", master_host.c_str(), master_port);
+  if (ok && slept) {
+    ROS_INFO("Connected to master at [%s:%d]", master_host.c_str(),
+             master_port);
   }
 
   XMLRPCManager::instance()->releaseXMLRPCClient(c);
@@ -244,6 +217,6 @@ bool execute(const std::string& method, const XmlRpc::XmlRpcValue& request, XmlR
   return b;
 }
 
-} // namespace master
+}  // namespace master
 
-} // namespace ros
+}  // namespace ros

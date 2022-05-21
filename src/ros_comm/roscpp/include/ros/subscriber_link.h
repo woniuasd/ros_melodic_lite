@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,17 +28,15 @@
 #ifndef ROSCPP_SUBSCRIBER_LINK_H
 #define ROSCPP_SUBSCRIBER_LINK_H
 
-#include "ros/common.h"
-
-#include <boost/thread/mutex.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/weak_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
-
+#include <boost/shared_array.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/weak_ptr.hpp>
 #include <queue>
 
-namespace ros
-{
+#include "ros/common.h"
+
+namespace ros {
 class Header;
 class Message;
 class Publication;
@@ -47,29 +45,31 @@ typedef boost::weak_ptr<Publication> PublicationWPtr;
 class Connection;
 typedef boost::shared_ptr<Connection> ConnectionPtr;
 
-class ROSCPP_DECL SubscriberLink : public boost::enable_shared_from_this<SubscriberLink>
-{
-public:
-  class Stats
-  {
-  public:
+class ROSCPP_DECL SubscriberLink
+    : public boost::enable_shared_from_this<SubscriberLink> {
+ public:
+  class Stats {
+   public:
     uint64_t bytes_sent_, message_data_sent_, messages_sent_;
-    Stats()
-    : bytes_sent_(0), message_data_sent_(0), messages_sent_(0) { }
+    Stats() : bytes_sent_(0), message_data_sent_(0), messages_sent_(0) {}
   };
 
   SubscriberLink();
   virtual ~SubscriberLink();
 
   const std::string& getTopic() const { return topic_; }
-  const Stats &getStats() { return stats_; }
-  const std::string &getDestinationCallerID() const { return destination_caller_id_; }
+  const Stats& getStats() { return stats_; }
+  const std::string& getDestinationCallerID() const {
+    return destination_caller_id_;
+  }
   int getConnectionID() const { return connection_id_; }
 
   /**
-   * \brief Queue up a message for publication.  Throws out old messages if we've reached our Publication's max queue size
+   * \brief Queue up a message for publication.  Throws out old messages if
+   * we've reached our Publication's max queue size
    */
-  virtual void enqueueMessage(const SerializedMessage& m, bool ser, bool nocopy) = 0;
+  virtual void enqueueMessage(const SerializedMessage& m, bool ser,
+                              bool nocopy) = 0;
 
   virtual void drop() = 0;
 
@@ -77,14 +77,19 @@ public:
   virtual std::string getTransportInfo() = 0;
 
   virtual bool isIntraprocess() { return false; }
-  virtual void getPublishTypes(bool& ser, bool& nocopy, const std::type_info& ti) { (void)ti; ser = true; nocopy = false; }
+  virtual void getPublishTypes(bool& ser, bool& nocopy,
+                               const std::type_info& ti) {
+    (void)ti;
+    ser = true;
+    nocopy = false;
+  }
 
   const std::string& getMD5Sum();
   const std::string& getDataType();
   const std::string& getMessageDefinition();
 
-protected:
-  bool verifyDatatype(const std::string &datatype);
+ protected:
+  bool verifyDatatype(const std::string& datatype);
 
   PublicationWPtr parent_;
   unsigned int connection_id_;
@@ -93,8 +98,6 @@ protected:
   std::string topic_;
 };
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_SUBSCRIBER_LINK_H
-
-
+#endif  // ROSCPP_SUBSCRIBER_LINK_H

@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,20 +28,17 @@
 #ifndef ROSCPP_PUBLICATION_H
 #define ROSCPP_PUBLICATION_H
 
-#include "ros/forwards.h"
-#include "ros/advertise_options.h"
-#include "common.h"
-#include "xmlrpcpp/XmlRpc.h"
-
-#include <boost/thread/mutex.hpp>
-
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
-
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 #include <vector>
 
-namespace ros
-{
+#include "common.h"
+#include "ros/advertise_options.h"
+#include "ros/forwards.h"
+#include "xmlrpcpp/XmlRpc.h"
+
+namespace ros {
 
 class SubscriberLink;
 typedef boost::shared_ptr<SubscriberLink> SubscriberLinkPtr;
@@ -50,16 +47,11 @@ typedef std::vector<SubscriberLinkPtr> V_SubscriberLink;
 /**
  * \brief A Publication manages an advertised topic
  */
-class ROSCPP_DECL Publication
-{
-public:
-  Publication(const std::string &name,
-            const std::string& datatype,
-            const std::string& _md5sum,
-            const std::string& message_definition,
-            size_t max_queue,
-            bool latch,
-            bool has_header);
+class ROSCPP_DECL Publication {
+ public:
+  Publication(const std::string& name, const std::string& datatype,
+              const std::string& _md5sum, const std::string& message_definition,
+              size_t max_queue, bool latch, bool has_header);
 
   ~Publication();
 
@@ -67,7 +59,8 @@ public:
   void removeCallbacks(const SubscriberCallbacksPtr& callbacks);
 
   /**
-   * \brief queues an outgoing message into each of the publishers, so that it gets sent to every subscriber
+   * \brief queues an outgoing message into each of the publishers, so that it
+   * gets sent to every subscriber
    */
   bool enqueueMessage(const SerializedMessage& m);
   /**
@@ -107,9 +100,12 @@ public:
    */
   const std::string& getMD5Sum() const { return md5sum_; }
   /**
-   * \brief Returns the full definition of the message published by this publication
+   * \brief Returns the full definition of the message published by this
+   * publication
    */
-  const std::string& getMessageDefinition() const { return message_definition_; }
+  const std::string& getMessageDefinition() const {
+    return message_definition_;
+  }
   /**
    * \brief Returns the sequence number
    */
@@ -122,7 +118,8 @@ public:
    */
   void addSubscriberLink(const SubscriberLinkPtr& sub_link);
   /**
-   * \brief Removes a publisher from our list (deleting it if it's the last reference)
+   * \brief Removes a publisher from our list (deleting it if it's the last
+   * reference)
    */
   void removeSubscriberLink(const SubscriberLinkPtr& sub_link);
 
@@ -146,7 +143,7 @@ public:
 
   bool validateHeader(const Header& h, std::string& error_msg);
 
-private:
+ private:
   void dropAllConnections();
 
   /**
@@ -154,7 +151,8 @@ private:
    */
   void peerConnect(const SubscriberLinkPtr& sub_link);
   /**
-   * \brief Called when a peer has disconnected. Calls the disconnection callback
+   * \brief Called when a peer has disconnected. Calls the disconnection
+   * callback
    */
   void peerDisconnect(const SubscriberLinkPtr& sub_link);
 
@@ -171,7 +169,8 @@ private:
   boost::mutex callbacks_mutex_;
 
   V_SubscriberLink subscriber_links_;
-  // We use a recursive mutex here for the rare case that a publish call causes another one (like in the case of a rosconsole call)
+  // We use a recursive mutex here for the rare case that a publish call causes
+  // another one (like in the case of a rosconsole call)
   boost::mutex subscriber_links_mutex_;
 
   bool dropped_;
@@ -187,6 +186,6 @@ private:
   boost::mutex publish_queue_mutex_;
 };
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_PUBLICATION_H
+#endif  // ROSCPP_PUBLICATION_H

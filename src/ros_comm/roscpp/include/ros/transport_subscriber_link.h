@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,20 +27,19 @@
 
 #ifndef ROSCPP_TRANSPORT_SUBSCRIBER_LINK_H
 #define ROSCPP_TRANSPORT_SUBSCRIBER_LINK_H
+#include <boost/signals2/connection.hpp>
+
 #include "common.h"
 #include "subscriber_link.h"
 
-#include <boost/signals2/connection.hpp>
-
-namespace ros
-{
+namespace ros {
 
 /**
- * \brief SubscriberLink handles broadcasting messages to a single subscriber on a single topic
+ * \brief SubscriberLink handles broadcasting messages to a single subscriber on
+ * a single topic
  */
-class ROSCPP_DECL TransportSubscriberLink : public SubscriberLink
-{
-public:
+class ROSCPP_DECL TransportSubscriberLink : public SubscriberLink {
+ public:
   TransportSubscriberLink();
   virtual ~TransportSubscriberLink();
 
@@ -50,12 +49,13 @@ public:
 
   const ConnectionPtr& getConnection() { return connection_; }
 
-  virtual void enqueueMessage(const SerializedMessage& m, bool ser, bool nocopy);
+  virtual void enqueueMessage(const SerializedMessage& m, bool ser,
+                              bool nocopy);
   virtual void drop();
   virtual std::string getTransportType();
   virtual std::string getTransportInfo();
 
-private:
+ private:
   void onConnectionDropped(const ConnectionPtr& conn);
 
   void onHeaderWritten(const ConnectionPtr& conn);
@@ -74,6 +74,6 @@ private:
 };
 typedef boost::shared_ptr<TransportSubscriberLink> TransportSubscriberLinkPtr;
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_TRANSPORT_SUBSCRIBER_LINK_H
+#endif  // ROSCPP_TRANSPORT_SUBSCRIBER_LINK_H

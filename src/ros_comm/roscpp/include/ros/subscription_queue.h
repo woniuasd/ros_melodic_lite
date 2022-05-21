@@ -28,30 +28,30 @@
 #ifndef ROSCPP_SUBSCRIPTION_QUEUE_H
 #define ROSCPP_SUBSCRIPTION_QUEUE_H
 
-#include "forwards.h"
-#include "common.h"
-#include "ros/message_event.h"
-#include "callback_queue_interface.h"
-
-#include <boost/thread/recursive_mutex.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <deque>
 
-namespace ros
-{
+#include "callback_queue_interface.h"
+#include "common.h"
+#include "forwards.h"
+#include "ros/message_event.h"
+
+namespace ros {
 
 class MessageDeserializer;
 typedef boost::shared_ptr<MessageDeserializer> MessageDeserializerPtr;
 
 class SubscriptionCallbackHelper;
-typedef boost::shared_ptr<SubscriptionCallbackHelper> SubscriptionCallbackHelperPtr;
+typedef boost::shared_ptr<SubscriptionCallbackHelper>
+    SubscriptionCallbackHelperPtr;
 
-class ROSCPP_DECL SubscriptionQueue : public CallbackInterface, public boost::enable_shared_from_this<SubscriptionQueue>
-{
-private:
-  struct Item
-  {
+class ROSCPP_DECL SubscriptionQueue
+    : public CallbackInterface,
+      public boost::enable_shared_from_this<SubscriptionQueue> {
+ private:
+  struct Item {
     SubscriptionCallbackHelperPtr helper;
     MessageDeserializerPtr deserializer;
 
@@ -63,20 +63,22 @@ private:
   };
   typedef std::deque<Item> D_Item;
 
-public:
-  SubscriptionQueue(const std::string& topic, int32_t queue_size, bool allow_concurrent_callbacks);
+ public:
+  SubscriptionQueue(const std::string& topic, int32_t queue_size,
+                    bool allow_concurrent_callbacks);
   ~SubscriptionQueue();
 
-  void push(const SubscriptionCallbackHelperPtr& helper, const MessageDeserializerPtr& deserializer, 
-	    bool has_tracked_object, const VoidConstWPtr& tracked_object, bool nonconst_need_copy, 
-	    ros::Time receipt_time = ros::Time(), bool* was_full = 0);
+  void push(const SubscriptionCallbackHelperPtr& helper,
+            const MessageDeserializerPtr& deserializer, bool has_tracked_object,
+            const VoidConstWPtr& tracked_object, bool nonconst_need_copy,
+            ros::Time receipt_time = ros::Time(), bool* was_full = 0);
   void clear();
 
   virtual CallbackInterface::CallResult call();
   virtual bool ready();
   bool full();
 
-private:
+ private:
   bool fullNoLock();
   std::string topic_;
   int32_t size_;
@@ -90,6 +92,6 @@ private:
   boost::recursive_mutex callback_mutex_;
 };
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_SUBSCRIPTION_QUEUE_H
+#endif  // ROSCPP_SUBSCRIPTION_QUEUE_H

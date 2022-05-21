@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -26,76 +26,60 @@
  */
 
 #include "ros/steady_timer.h"
+
 #include "ros/timer_manager.h"
 
-namespace ros
-{
+namespace ros {
 
-SteadyTimer::Impl::Impl()
-  : started_(false)
-  , timer_handle_(-1)
-{ }
+SteadyTimer::Impl::Impl() : started_(false), timer_handle_(-1) {}
 
-SteadyTimer::Impl::~Impl()
-{
+SteadyTimer::Impl::~Impl() {
   ROS_DEBUG("SteadyTimer deregistering callbacks.");
   stop();
 }
 
-bool SteadyTimer::Impl::hasStarted() const
-{
-  return started_;
-}
+bool SteadyTimer::Impl::hasStarted() const { return started_; }
 
-void SteadyTimer::Impl::start()
-{
-  if (!started_)
-  {
+void SteadyTimer::Impl::start() {
+  if (!started_) {
     VoidConstPtr tracked_object;
-    if (has_tracked_object_)
-    {
+    if (has_tracked_object_) {
       tracked_object = tracked_object_.lock();
     }
-    timer_handle_ = TimerManager<SteadyTime, WallDuration, SteadyTimerEvent>::global().add(period_, callback_, callback_queue_, tracked_object, oneshot_);
+    timer_handle_ =
+        TimerManager<SteadyTime, WallDuration, SteadyTimerEvent>::global().add(
+            period_, callback_, callback_queue_, tracked_object, oneshot_);
     started_ = true;
   }
 }
 
-void SteadyTimer::Impl::stop()
-{
-  if (started_)
-  {
+void SteadyTimer::Impl::stop() {
+  if (started_) {
     started_ = false;
-    TimerManager<SteadyTime, WallDuration, SteadyTimerEvent>::global().remove(timer_handle_);
+    TimerManager<SteadyTime, WallDuration, SteadyTimerEvent>::global().remove(
+        timer_handle_);
     timer_handle_ = -1;
   }
 }
 
-bool SteadyTimer::Impl::isValid()
-{
-  return !period_.isZero();
-}
+bool SteadyTimer::Impl::isValid() { return !period_.isZero(); }
 
-bool SteadyTimer::Impl::hasPending()
-{
-  if (!isValid() || timer_handle_ == -1)
-  {
+bool SteadyTimer::Impl::hasPending() {
+  if (!isValid() || timer_handle_ == -1) {
     return false;
   }
 
-  return TimerManager<SteadyTime, WallDuration, SteadyTimerEvent>::global().hasPending(timer_handle_);
+  return TimerManager<SteadyTime, WallDuration, SteadyTimerEvent>::global()
+      .hasPending(timer_handle_);
 }
 
-void SteadyTimer::Impl::setPeriod(const WallDuration& period, bool reset)
-{
+void SteadyTimer::Impl::setPeriod(const WallDuration& period, bool reset) {
   period_ = period;
-  TimerManager<SteadyTime, WallDuration, SteadyTimerEvent>::global().setPeriod(timer_handle_, period, reset);
+  TimerManager<SteadyTime, WallDuration, SteadyTimerEvent>::global().setPeriod(
+      timer_handle_, period, reset);
 }
 
-
-SteadyTimer::SteadyTimer(const SteadyTimerOptions& ops)
-: impl_(new Impl)
-{
+SteadyTimer::SteadyTimer(const SteadyTimerOptions& ops) : impl_(new Impl) {
   impl_->period_ = ops.period;
   impl_->callback_ = ops.callback;
   impl_->callback_queue_ = ops.callback_queue;
@@ -104,47 +88,34 @@ SteadyTimer::SteadyTimer(const SteadyTimerOptions& ops)
   impl_->oneshot_ = ops.oneshot;
 }
 
-SteadyTimer::SteadyTimer(const SteadyTimer& rhs)
-{
-  impl_ = rhs.impl_;
-}
+SteadyTimer::SteadyTimer(const SteadyTimer& rhs) { impl_ = rhs.impl_; }
 
-SteadyTimer::~SteadyTimer()
-{
-}
+SteadyTimer::~SteadyTimer() {}
 
-void SteadyTimer::start()
-{
-  if (impl_)
-  {
+void SteadyTimer::start() {
+  if (impl_) {
     impl_->start();
   }
 }
 
-void SteadyTimer::stop()
-{
-  if (impl_)
-  {
+void SteadyTimer::stop() {
+  if (impl_) {
     impl_->stop();
   }
 }
 
-bool SteadyTimer::hasPending()
-{
-  if (impl_)
-  {
+bool SteadyTimer::hasPending() {
+  if (impl_) {
     return impl_->hasPending();
   }
 
   return false;
 }
 
-void SteadyTimer::setPeriod(const WallDuration& period, bool reset)
-{
-  if (impl_)
-  {
+void SteadyTimer::setPeriod(const WallDuration& period, bool reset) {
+  if (impl_) {
     impl_->setPeriod(period, reset);
   }
 }
 
-}
+}  // namespace ros

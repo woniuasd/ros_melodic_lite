@@ -32,65 +32,64 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ros/transport_publisher_link.h"
+
 #include <ros/platform.h>  // platform dependendant requirements
 
-#include "ros/transport_publisher_link.h"
-#include "ros/subscription.h"
-#include "ros/header.h"
-#include "ros/connection.h"
-#include "ros/transport/transport.h"
-#include "ros/this_node.h"
-#include "ros/connection_manager.h"
-#include "ros/file_log.h"
-#include "ros/poll_manager.h"
-#include "ros/transport/transport_tcp.h"
-#include "ros/timer_manager.h"
-#include "ros/callback_queue.h"
-#include "ros/internal_timer_manager.h"
-
 #include <boost/bind.hpp>
-
 #include <sstream>
 
-namespace ros
-{
+#include "ros/callback_queue.h"
+#include "ros/connection.h"
+#include "ros/connection_manager.h"
+#include "ros/file_log.h"
+#include "ros/header.h"
+#include "ros/internal_timer_manager.h"
+#include "ros/poll_manager.h"
+#include "ros/subscription.h"
+#include "ros/this_node.h"
+#include "ros/timer_manager.h"
+#include "ros/transport/transport.h"
+#include "ros/transport/transport_tcp.h"
 
-TransportPublisherLink::TransportPublisherLink(const SubscriptionPtr& parent, const std::string& xmlrpc_uri, const TransportHints& transport_hints)
-: PublisherLink(parent, xmlrpc_uri, transport_hints)
-, retry_timer_handle_(-1)
-, needs_retry_(false)
-, dropping_(false)
-{
-}
+namespace ros {
 
-TransportPublisherLink::~TransportPublisherLink()
-{
+TransportPublisherLink::TransportPublisherLink(
+    const SubscriptionPtr& parent, const std::string& xmlrpc_uri,
+    const TransportHints& transport_hints)
+    : PublisherLink(parent, xmlrpc_uri, transport_hints),
+      retry_timer_handle_(-1),
+      needs_retry_(false),
+      dropping_(false) {}
+
+TransportPublisherLink::~TransportPublisherLink() {
   dropping_ = true;
 
-  if (retry_timer_handle_ != -1)
-  {
+  if (retry_timer_handle_ != -1) {
     getInternalTimerManager()->remove(retry_timer_handle_);
   }
 
   connection_->drop(Connection::Destructing);
 }
 
-bool TransportPublisherLink::initialize(const ConnectionPtr& connection)
-{
+bool TransportPublisherLink::initialize(const ConnectionPtr& connection) {
   connection_ = connection;
-  // slot_type is used to automatically track the TransporPublisherLink class' existence
-  // and disconnect when this class' reference count is decremented to 0. It increments
-  // then decrements the shared_from_this reference count around calls to the
-  // onConnectionDropped function, preventing a coredump in the middle of execution.
-  connection_->addDropListener(Connection::DropSignal::slot_type(&TransportPublisherLink::onConnectionDropped, this, _1, _2).track(shared_from_this()));
+  // slot_type is used to automatically track the TransporPublisherLink class'
+  // existence and disconnect when this class' reference count is decremented to
+  // 0. It increments then decrements the shared_from_this reference count
+  // around calls to the onConnectionDropped function, preventing a coredump in
+  // the middle of execution.
+  connection_->addDropListener(
+      Connection::DropSignal::slot_type(
+          &TransportPublisherLink::onConnectionDropped, this, _1, _2)
+          .track(shared_from_this()));
 
-  if (connection_->getTransport()->requiresHeader())
-  {
-    connection_->setHeaderReceivedCallback(boost::bind(&TransportPublisherLink::onHeaderReceived, this, _1, _2));
+  if (connection_->getTransport()->requiresHeader()) {
+    connection_->setHeaderReceivedCallback(
+        boost::bind(&TransportPublisherLink::onHeaderReceived, this, _1, _2));
 
     SubscriptionPtr parent = parent_.lock();
-    if (!parent)
-    {
+    if (!parent) {
       return false;
     }
 
@@ -100,69 +99,66 @@ bool TransportPublisherLink::initialize(const ConnectionPtr& connection)
     header["callerid"] = this_node::getName();
     header["type"] = parent->datatype();
     header["tcp_nodelay"] = transport_hints_.getTCPNoDelay() ? "1" : "0";
-    connection_->writeHeader(header, boost::bind(&TransportPublisherLink::onHeaderWritten, this, _1));
-  }
-  else
-  {
-    connection_->read(4, boost::bind(&TransportPublisherLink::onMessageLength, this, _1, _2, _3, _4));
+    connection_->writeHeader(
+        header,
+        boost::bind(&TransportPublisherLink::onHeaderWritten, this, _1));
+  } else {
+    connection_->read(4, boost::bind(&TransportPublisherLink::onMessageLength,
+                                     this, _1, _2, _3, _4));
   }
 
   return true;
 }
 
-void TransportPublisherLink::drop()
-{
+void TransportPublisherLink::drop() {
   dropping_ = true;
   connection_->drop(Connection::Destructing);
 
-  if (SubscriptionPtr parent = parent_.lock())
-  {
+  if (SubscriptionPtr parent = parent_.lock()) {
     parent->removePublisherLink(shared_from_this());
   }
 }
 
-void TransportPublisherLink::onHeaderWritten(const ConnectionPtr& conn)
-{
+void TransportPublisherLink::onHeaderWritten(const ConnectionPtr& conn) {
   (void)conn;
   // Do nothing
 }
 
-bool TransportPublisherLink::onHeaderReceived(const ConnectionPtr& conn, const Header& header)
-{
+bool TransportPublisherLink::onHeaderReceived(const ConnectionPtr& conn,
+                                              const Header& header) {
   (void)conn;
   ROS_ASSERT(conn == connection_);
 
-  if (!setHeader(header))
-  {
+  if (!setHeader(header)) {
     drop();
     return false;
   }
 
-  if (retry_timer_handle_ != -1)
-  {
+  if (retry_timer_handle_ != -1) {
     getInternalTimerManager()->remove(retry_timer_handle_);
     retry_timer_handle_ = -1;
   }
 
-  connection_->read(4, boost::bind(&TransportPublisherLink::onMessageLength, this, _1, _2, _3, _4));
+  connection_->read(4, boost::bind(&TransportPublisherLink::onMessageLength,
+                                   this, _1, _2, _3, _4));
 
   return true;
 }
 
-void TransportPublisherLink::onMessageLength(const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success)
-{
+void TransportPublisherLink::onMessageLength(
+    const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer,
+    uint32_t size, bool success) {
   (void)conn;
   (void)size;
-  if (retry_timer_handle_ != -1)
-  {
+  if (retry_timer_handle_ != -1) {
     getInternalTimerManager()->remove(retry_timer_handle_);
     retry_timer_handle_ = -1;
   }
 
-  if (!success)
-  {
+  if (!success) {
     if (connection_)
-      connection_->read(4, boost::bind(&TransportPublisherLink::onMessageLength, this, _1, _2, _3, _4));
+      connection_->read(4, boost::bind(&TransportPublisherLink::onMessageLength,
+                                       this, _1, _2, _3, _4));
     return;
   }
 
@@ -171,81 +167,77 @@ void TransportPublisherLink::onMessageLength(const ConnectionPtr& conn, const bo
 
   uint32_t len = *((uint32_t*)buffer.get());
 
-  if (len > 1000000000)
-  {
-    ROS_ERROR("a message of over a gigabyte was " \
-                "predicted in tcpros. that seems highly " \
-                "unlikely, so I'll assume protocol " \
-                "synchronization is lost.");
+  if (len > 1000000000) {
+    ROS_ERROR(
+        "a message of over a gigabyte was "
+        "predicted in tcpros. that seems highly "
+        "unlikely, so I'll assume protocol "
+        "synchronization is lost.");
     drop();
     return;
   }
 
-  connection_->read(len, boost::bind(&TransportPublisherLink::onMessage, this, _1, _2, _3, _4));
+  connection_->read(len, boost::bind(&TransportPublisherLink::onMessage, this,
+                                     _1, _2, _3, _4));
 }
 
-void TransportPublisherLink::onMessage(const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success)
-{
-  if (!success && !conn)
-    return;
+void TransportPublisherLink::onMessage(
+    const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer,
+    uint32_t size, bool success) {
+  if (!success && !conn) return;
 
   ROS_ASSERT(conn == connection_);
 
-  if (success)
-  {
+  if (success) {
     handleMessage(SerializedMessage(buffer, size), true, false);
   }
 
-  if (success || !connection_->getTransport()->requiresHeader())
-  {
-    connection_->read(4, boost::bind(&TransportPublisherLink::onMessageLength, this, _1, _2, _3, _4));
+  if (success || !connection_->getTransport()->requiresHeader()) {
+    connection_->read(4, boost::bind(&TransportPublisherLink::onMessageLength,
+                                     this, _1, _2, _3, _4));
   }
 }
 
-void TransportPublisherLink::onRetryTimer(const ros::SteadyTimerEvent&)
-{
-  if (dropping_)
-  {
+void TransportPublisherLink::onRetryTimer(const ros::SteadyTimerEvent&) {
+  if (dropping_) {
     return;
   }
 
-  if (needs_retry_ && SteadyTime::now() > next_retry_)
-  {
+  if (needs_retry_ && SteadyTime::now() > next_retry_) {
     retry_period_ = std::min(retry_period_ * 2, WallDuration(20));
     needs_retry_ = false;
     SubscriptionPtr parent = parent_.lock();
     // TODO: support retry on more than just TCP
     // For now, since UDP does not have a heartbeat, we do not attempt to retry
-    // UDP connections since an error there likely means some invalid operation has
-    // happened.
-    if (connection_->getTransport()->getType() == std::string("TCPROS"))
-    {
+    // UDP connections since an error there likely means some invalid operation
+    // has happened.
+    if (connection_->getTransport()->getType() == std::string("TCPROS")) {
       std::string topic = parent ? parent->getName() : "unknown";
 
-      TransportTCPPtr old_transport = boost::dynamic_pointer_cast<TransportTCP>(connection_->getTransport());
+      TransportTCPPtr old_transport = boost::dynamic_pointer_cast<TransportTCP>(
+          connection_->getTransport());
       ROS_ASSERT(old_transport);
       const std::string& host = old_transport->getConnectedHost();
       int port = old_transport->getConnectedPort();
 
-      ROSCPP_CONN_LOG_DEBUG("Retrying connection to [%s:%d] for topic [%s]", host.c_str(), port, topic.c_str());
+      ROSCPP_CONN_LOG_DEBUG("Retrying connection to [%s:%d] for topic [%s]",
+                            host.c_str(), port, topic.c_str());
 
-      TransportTCPPtr transport(boost::make_shared<TransportTCP>(&PollManager::instance()->getPollSet()));
-      if (transport->connect(host, port))
-      {
+      TransportTCPPtr transport(boost::make_shared<TransportTCP>(
+          &PollManager::instance()->getPollSet()));
+      if (transport->connect(host, port)) {
         ConnectionPtr connection(boost::make_shared<Connection>());
         connection->initialize(transport, false, HeaderReceivedFunc());
-        if (initialize(connection))
-        {
+        if (initialize(connection)) {
           ConnectionManager::instance()->addConnection(connection);
         }
+      } else {
+        ROSCPP_CONN_LOG_DEBUG(
+            "connect() failed when retrying connection to [%s:%d] for topic "
+            "[%s]",
+            host.c_str(), port, topic.c_str());
       }
-      else
-      {
-        ROSCPP_CONN_LOG_DEBUG("connect() failed when retrying connection to [%s:%d] for topic [%s]", host.c_str(), port, topic.c_str());
-      }
-    }
-    else if (parent)
-    {
+    } else if (parent) {
       parent->removePublisherLink(shared_from_this());
     }
   }
@@ -253,11 +245,10 @@ void TransportPublisherLink::onRetryTimer(const ros::SteadyTimerEvent&)
 
 CallbackQueuePtr getInternalCallbackQueue();
 
-void TransportPublisherLink::onConnectionDropped(const ConnectionPtr& conn, Connection::DropReason reason)
-{
+void TransportPublisherLink::onConnectionDropped(
+    const ConnectionPtr& conn, Connection::DropReason reason) {
   (void)conn;
-  if (dropping_)
-  {
+  if (dropping_) {
     return;
   }
 
@@ -265,59 +256,54 @@ void TransportPublisherLink::onConnectionDropped(const ConnectionPtr& conn, Conn
 
   SubscriptionPtr parent = parent_.lock();
 
-  if (reason == Connection::TransportDisconnect)
-  {
+  if (reason == Connection::TransportDisconnect) {
     std::string topic = parent ? parent->getName() : "unknown";
 
-    ROSCPP_CONN_LOG_DEBUG("Connection to publisher [%s] to topic [%s] dropped", connection_->getTransport()->getTransportInfo().c_str(), topic.c_str());
+    ROSCPP_CONN_LOG_DEBUG(
+        "Connection to publisher [%s] to topic [%s] dropped",
+        connection_->getTransport()->getTransportInfo().c_str(), topic.c_str());
 
     ROS_ASSERT(!needs_retry_);
     needs_retry_ = true;
     next_retry_ = SteadyTime::now() + retry_period_;
 
-    if (retry_timer_handle_ == -1)
-    {
+    if (retry_timer_handle_ == -1) {
       retry_period_ = WallDuration(0.1);
       next_retry_ = SteadyTime::now() + retry_period_;
-      // shared_from_this() shared_ptr is used to ensure TransportPublisherLink is not
-      // destroyed in the middle of onRetryTimer execution
-      retry_timer_handle_ = getInternalTimerManager()->add(WallDuration(retry_period_),
-          boost::bind(&TransportPublisherLink::onRetryTimer, this, _1), getInternalCallbackQueue().get(),
-          shared_from_this(), false);
-    }
-    else
-    {
+      // shared_from_this() shared_ptr is used to ensure TransportPublisherLink
+      // is not destroyed in the middle of onRetryTimer execution
+      retry_timer_handle_ = getInternalTimerManager()->add(
+          WallDuration(retry_period_),
+          boost::bind(&TransportPublisherLink::onRetryTimer, this, _1),
+          getInternalCallbackQueue().get(), shared_from_this(), false);
+    } else {
       getInternalTimerManager()->setPeriod(retry_timer_handle_, retry_period_);
     }
-  }
-  else
-  {
+  } else {
     drop();
   }
 }
 
-void TransportPublisherLink::handleMessage(const SerializedMessage& m, bool ser, bool nocopy)
-{
+void TransportPublisherLink::handleMessage(const SerializedMessage& m, bool ser,
+                                           bool nocopy) {
   stats_.bytes_received_ += m.num_bytes;
   stats_.messages_received_++;
 
   SubscriptionPtr parent = parent_.lock();
 
-  if (parent)
-  {
-    stats_.drops_ += parent->handleMessage(m, ser, nocopy, getConnection()->getHeader().getValues(), shared_from_this());
+  if (parent) {
+    stats_.drops_ += parent->handleMessage(
+        m, ser, nocopy, getConnection()->getHeader().getValues(),
+        shared_from_this());
   }
 }
 
-std::string TransportPublisherLink::getTransportType()
-{
+std::string TransportPublisherLink::getTransportType() {
   return connection_->getTransport()->getType();
 }
 
-std::string TransportPublisherLink::getTransportInfo()
-{
+std::string TransportPublisherLink::getTransportInfo() {
   return connection_->getTransport()->getTransportInfo();
 }
 
-} // namespace ros
-
+}  // namespace ros

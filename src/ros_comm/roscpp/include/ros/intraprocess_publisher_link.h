@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,28 +28,29 @@
 #ifndef ROSCPP_INTRAPROCESS_PUBLISHER_LINK_H
 #define ROSCPP_INTRAPROCESS_PUBLISHER_LINK_H
 
-#include "publisher_link.h"
-#include "common.h"
-
 #include <boost/thread/recursive_mutex.hpp>
 
-namespace ros
-{
+#include "common.h"
+#include "publisher_link.h"
+
+namespace ros {
 class Subscription;
 typedef boost::shared_ptr<Subscription> SubscriptionPtr;
 typedef boost::weak_ptr<Subscription> SubscriptionWPtr;
 
 class IntraProcessSubscriberLink;
-typedef boost::shared_ptr<IntraProcessSubscriberLink> IntraProcessSubscriberLinkPtr;
+typedef boost::shared_ptr<IntraProcessSubscriberLink>
+    IntraProcessSubscriberLinkPtr;
 
 /**
- * \brief Handles a connection to a single publisher on a given topic.  Receives messages from a publisher
- * and hands them off to its parent Subscription
+ * \brief Handles a connection to a single publisher on a given topic.  Receives
+ * messages from a publisher and hands them off to its parent Subscription
  */
-class ROSCPP_DECL IntraProcessPublisherLink : public PublisherLink
-{
-public:
-  IntraProcessPublisherLink(const SubscriptionPtr& parent, const std::string& xmlrpc_uri, const TransportHints& transport_hints);
+class ROSCPP_DECL IntraProcessPublisherLink : public PublisherLink {
+ public:
+  IntraProcessPublisherLink(const SubscriptionPtr& parent,
+                            const std::string& xmlrpc_uri,
+                            const TransportHints& transport_hints);
   virtual ~IntraProcessPublisherLink();
 
   void setPublisher(const IntraProcessSubscriberLinkPtr& publisher);
@@ -59,22 +60,21 @@ public:
   virtual void drop();
 
   /**
-   * \brief Handles handing off a received message to the subscription, where it will be deserialized and called back
+   * \brief Handles handing off a received message to the subscription, where it
+   * will be deserialized and called back
    */
   virtual void handleMessage(const SerializedMessage& m, bool ser, bool nocopy);
 
   void getPublishTypes(bool& ser, bool& nocopy, const std::type_info& ti);
 
-private:
+ private:
   IntraProcessSubscriberLinkPtr publisher_;
   bool dropped_;
   boost::recursive_mutex drop_mutex_;
 };
-typedef boost::shared_ptr<IntraProcessPublisherLink> IntraProcessPublisherLinkPtr;
+typedef boost::shared_ptr<IntraProcessPublisherLink>
+    IntraProcessPublisherLinkPtr;
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_INTRAPROCESS_PUBLISHER_LINK_H
-
-
-
+#endif  // ROSCPP_INTRAPROCESS_PUBLISHER_LINK_H

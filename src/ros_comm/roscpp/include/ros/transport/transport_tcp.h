@@ -35,15 +35,15 @@
 #ifndef ROSCPP_TRANSPORT_TCP_H
 #define ROSCPP_TRANSPORT_TCP_H
 
-#include <ros/types.h>
+#include <ros/common.h>
 #include <ros/transport/transport.h>
+#include <ros/types.h>
 
 #include <boost/thread/recursive_mutex.hpp>
-#include "ros/io.h"
-#include <ros/common.h>
 
-namespace ros
-{
+#include "ros/io.h"
+
+namespace ros {
 
 class TransportTCP;
 typedef boost::shared_ptr<TransportTCP> TransportTCPPtr;
@@ -53,16 +53,14 @@ class PollSet;
 /**
  * \brief TCPROS transport
  */
-class ROSCPP_DECL TransportTCP : public Transport
-{
-public:
+class ROSCPP_DECL TransportTCP : public Transport {
+ public:
   static bool s_use_keepalive_;
   static bool s_use_ipv6_;
 
-public:
-  enum Flags
-  {
-    SYNCHRONOUS = 1<<0,
+ public:
+  enum Flags {
+    SYNCHRONOUS = 1 << 0,
   };
 
   TransportTCP(PollSet* poll_set, int flags = 0);
@@ -85,12 +83,14 @@ public:
   /**
    * \brief Start a server socket and listen on a port
    * \param port The port to listen on
-   * \param backlog defines the maximum length for the queue of pending connections.  Identical to the backlog parameter to the ::listen function
+   * \param backlog defines the maximum length for the queue of pending
+   * connections.  Identical to the backlog parameter to the ::listen function
    * \param accept_cb The function to call when a client socket has connected
    */
   bool listen(int port, int backlog, const AcceptCallback& accept_cb);
   /**
-   * \brief Accept a connection on a server socket.  Blocks until a connection is available
+   * \brief Accept a connection on a server socket.  Blocks until a connection
+   * is available
    */
   TransportTCPPtr accept();
   /**
@@ -122,9 +122,10 @@ public:
 
   virtual const char* getType() { return "TCPROS"; }
 
-private:
+ private:
   /**
-   * \brief Initializes the assigned socket -- sets it to non-blocking and enables reading
+   * \brief Initializes the assigned socket -- sets it to non-blocking and
+   * enables reading
    */
   bool initializeSocket();
 
@@ -165,7 +166,6 @@ private:
   int connected_port_;
 };
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_TRANSPORT_TCP_H
-
+#endif  // ROSCPP_TRANSPORT_TCP_H

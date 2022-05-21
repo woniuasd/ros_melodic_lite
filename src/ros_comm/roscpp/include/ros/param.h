@@ -28,21 +28,19 @@
 #ifndef ROSCPP_PARAM_H
 #define ROSCPP_PARAM_H
 
-#include "forwards.h"
+#include <map>
+#include <vector>
+
 #include "common.h"
+#include "forwards.h"
 #include "xmlrpcpp/XmlRpcValue.h"
 
-#include <vector>
-#include <map>
-
-namespace ros
-{
+namespace ros {
 
 /**
  * \brief Contains functions which allow you to query the parameter server
  */
-namespace param
-{
+namespace param {
 
 /** \brief Set an arbitrary XML/RPC value on the parameter server.
  *
@@ -87,14 +85,14 @@ ROSCPP_DECL void set(const std::string& key, int i);
  */
 ROSCPP_DECL void set(const std::string& key, bool b);
 
-
 /** \brief Set a string vector value on the parameter server.
  *
  * \param key The key to be used in the parameter server's dictionary
  * \param vec The vector value to be inserted.
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL void set(const std::string& key, const std::vector<std::string>& vec);
+ROSCPP_DECL void set(const std::string& key,
+                     const std::vector<std::string>& vec);
 /** \brief Set a double vector value on the parameter server.
  *
  * \param key The key to be used in the parameter server's dictionary
@@ -130,36 +128,40 @@ ROSCPP_DECL void set(const std::string& key, const std::vector<bool>& vec);
  * \param map The map value to be inserted.
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL void set(const std::string& key, const std::map<std::string, std::string>& map);
+ROSCPP_DECL void set(const std::string& key,
+                     const std::map<std::string, std::string>& map);
 /** \brief Set a string->double map value on the parameter server.
  *
  * \param key The key to be used in the parameter server's dictionary
  * \param map The map value to be inserted.
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL void set(const std::string& key, const std::map<std::string, double>& map);
+ROSCPP_DECL void set(const std::string& key,
+                     const std::map<std::string, double>& map);
 /** \brief Set a string->float map value on the parameter server.
  *
  * \param key The key to be used in the parameter server's dictionary
  * \param map The map value to be inserted.
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL void set(const std::string& key, const std::map<std::string, float>& map);
+ROSCPP_DECL void set(const std::string& key,
+                     const std::map<std::string, float>& map);
 /** \brief Set a string->int map value on the parameter server.
  *
  * \param key The key to be used in the parameter server's dictionary
  * \param map The map value to be inserted.
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL void set(const std::string& key, const std::map<std::string, int>& map);
+ROSCPP_DECL void set(const std::string& key,
+                     const std::map<std::string, int>& map);
 /** \brief Set a string->bool map value on the parameter server.
  *
  * \param key The key to be used in the parameter server's dictionary
  * \param map The map value to be inserted.
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL void set(const std::string& key, const std::map<std::string, bool>& map);
-
+ROSCPP_DECL void set(const std::string& key,
+                     const std::map<std::string, bool>& map);
 
 /** \brief Get a string value from the parameter server.
  *
@@ -179,7 +181,8 @@ ROSCPP_DECL bool get(const std::string& key, std::string& s);
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
 ROSCPP_DECL bool get(const std::string& key, double& d);
-/** \brief Get a float value from the parameter server (internally using the double value).
+/** \brief Get a float value from the parameter server (internally using the
+ * double value).
  *
  * \param key The key to be used in the parameter server's dictionary
  * \param[out] f Storage for the retrieved value.
@@ -286,7 +289,8 @@ ROSCPP_DECL bool getCached(const std::string& key, int& i);
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
 ROSCPP_DECL bool getCached(const std::string& key, bool& b);
-/** \brief Get an arbitrary XML/RPC value from the parameter server, with local caching
+/** \brief Get an arbitrary XML/RPC value from the parameter server, with local
+ * caching
  *
  * This function will cache parameters locally, and subscribe for updates from
  * the parameter server.  Once the parameter is retrieved for the first time
@@ -347,7 +351,8 @@ ROSCPP_DECL bool get(const std::string& key, std::vector<int>& vec);
  */
 ROSCPP_DECL bool get(const std::string& key, std::vector<bool>& vec);
 
-/** \brief Get a string vector value from the parameter server, with local caching
+/** \brief Get a string vector value from the parameter server, with local
+ * caching
  *
  * This function will cache parameters locally, and subscribe for updates from
  * the parameter server.  Once the parameter is retrieved for the first time
@@ -360,8 +365,10 @@ ROSCPP_DECL bool get(const std::string& key, std::vector<bool>& vec);
  * \return true if the parameter value was retrieved, false otherwise
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL bool getCached(const std::string& key, std::vector<std::string>& vec);
-/** \brief Get a double vector value from the parameter server, with local caching
+ROSCPP_DECL bool getCached(const std::string& key,
+                           std::vector<std::string>& vec);
+/** \brief Get a double vector value from the parameter server, with local
+ * caching
  *
  * This function will cache parameters locally, and subscribe for updates from
  * the parameter server.  Once the parameter is retrieved for the first time
@@ -375,7 +382,8 @@ ROSCPP_DECL bool getCached(const std::string& key, std::vector<std::string>& vec
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
 ROSCPP_DECL bool getCached(const std::string& key, std::vector<double>& vec);
-/** \brief Get a float vector value from the parameter server, with local caching
+/** \brief Get a float vector value from the parameter server, with local
+ * caching
  *
  * This function will cache parameters locally, and subscribe for updates from
  * the parameter server.  Once the parameter is retrieved for the first time
@@ -426,7 +434,8 @@ ROSCPP_DECL bool getCached(const std::string& key, std::vector<bool>& vec);
  * \return true if the parameter value was retrieved, false otherwise
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL bool get(const std::string& key, std::map<std::string, std::string>& map);
+ROSCPP_DECL bool get(const std::string& key,
+                     std::map<std::string, std::string>& map);
 /** \brief Get a string->double map value from the parameter server.
  *
  * \param key The key to be used in the parameter server's dictionary
@@ -435,7 +444,8 @@ ROSCPP_DECL bool get(const std::string& key, std::map<std::string, std::string>&
  * \return true if the parameter value was retrieved, false otherwise
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL bool get(const std::string& key, std::map<std::string, double>& map);
+ROSCPP_DECL bool get(const std::string& key,
+                     std::map<std::string, double>& map);
 /** \brief Get a string->float map value from the parameter server.
  *
  * \param key The key to be used in the parameter server's dictionary
@@ -464,7 +474,8 @@ ROSCPP_DECL bool get(const std::string& key, std::map<std::string, int>& map);
  */
 ROSCPP_DECL bool get(const std::string& key, std::map<std::string, bool>& map);
 
-/** \brief Get a string->string map value from the parameter server, with local caching
+/** \brief Get a string->string map value from the parameter server, with local
+ * caching
  *
  * This function will cache parameters locally, and subscribe for updates from
  * the parameter server.  Once the parameter is retrieved for the first time
@@ -477,8 +488,10 @@ ROSCPP_DECL bool get(const std::string& key, std::map<std::string, bool>& map);
  * \return true if the parameter value was retrieved, false otherwise
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL bool getCached(const std::string& key, std::map<std::string, std::string>& map);
-/** \brief Get a string->double map value from the parameter server, with local caching
+ROSCPP_DECL bool getCached(const std::string& key,
+                           std::map<std::string, std::string>& map);
+/** \brief Get a string->double map value from the parameter server, with local
+ * caching
  *
  * This function will cache parameters locally, and subscribe for updates from
  * the parameter server.  Once the parameter is retrieved for the first time
@@ -491,8 +504,10 @@ ROSCPP_DECL bool getCached(const std::string& key, std::map<std::string, std::st
  * \return true if the parameter value was retrieved, false otherwise
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL bool getCached(const std::string& key, std::map<std::string, double>& map);
-/** \brief Get a string->float map value from the parameter server, with local caching
+ROSCPP_DECL bool getCached(const std::string& key,
+                           std::map<std::string, double>& map);
+/** \brief Get a string->float map value from the parameter server, with local
+ * caching
  *
  * This function will cache parameters locally, and subscribe for updates from
  * the parameter server.  Once the parameter is retrieved for the first time
@@ -505,8 +520,10 @@ ROSCPP_DECL bool getCached(const std::string& key, std::map<std::string, double>
  * \return true if the parameter value was retrieved, false otherwise
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL bool getCached(const std::string& key, std::map<std::string, float>& map);
-/** \brief Get a string->int map value from the parameter server, with local caching
+ROSCPP_DECL bool getCached(const std::string& key,
+                           std::map<std::string, float>& map);
+/** \brief Get a string->int map value from the parameter server, with local
+ * caching
  *
  * This function will cache parameters locally, and subscribe for updates from
  * the parameter server.  Once the parameter is retrieved for the first time
@@ -519,8 +536,10 @@ ROSCPP_DECL bool getCached(const std::string& key, std::map<std::string, float>&
  * \return true if the parameter value was retrieved, false otherwise
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL bool getCached(const std::string& key, std::map<std::string, int>& map);
-/** \brief Get a string->bool map value from the parameter server, with local caching
+ROSCPP_DECL bool getCached(const std::string& key,
+                           std::map<std::string, int>& map);
+/** \brief Get a string->bool map value from the parameter server, with local
+ * caching
  *
  * This function will cache parameters locally, and subscribe for updates from
  * the parameter server.  Once the parameter is retrieved for the first time
@@ -533,7 +552,8 @@ ROSCPP_DECL bool getCached(const std::string& key, std::map<std::string, int>& m
  * \return true if the parameter value was retrieved, false otherwise
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL bool getCached(const std::string& key, std::map<std::string, bool>& map);
+ROSCPP_DECL bool getCached(const std::string& key,
+                           std::map<std::string, bool>& map);
 
 /** \brief Check whether a parameter exists on the parameter server.
  *
@@ -554,10 +574,11 @@ ROSCPP_DECL bool del(const std::string& key);
 
 /** \brief Search up the tree for a parameter with a given key
  *
- * This function parameter server's searchParam feature to search up the tree for
- * a parameter.  For example, if the parameter server has a parameter [/a/b]
+ * This function parameter server's searchParam feature to search up the tree
+ * for a parameter.  For example, if the parameter server has a parameter [/a/b]
  * and you specify the namespace [/a/c/d], searching for the parameter "b" will
- * yield [/a/b].  If [/a/c/d/b] existed, that parameter would be returned instead.
+ * yield [/a/b].  If [/a/c/d/b] existed, that parameter would be returned
+ * instead.
  *
  * \param ns The namespace to begin the search in
  * \param key the parameter to search for
@@ -566,15 +587,17 @@ ROSCPP_DECL bool del(const std::string& key);
  * \return true if the parameter was found, false otherwise.
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-ROSCPP_DECL bool search(const std::string& ns, const std::string& key, std::string& result);
+ROSCPP_DECL bool search(const std::string& ns, const std::string& key,
+                        std::string& result);
 
-/** \brief Search up the tree for a parameter with a given key.  This version defaults to starting in
- * the current node's name
+/** \brief Search up the tree for a parameter with a given key.  This version
+ * defaults to starting in the current node's name
  *
- * This function parameter server's searchParam feature to search up the tree for
- * a parameter.  For example, if the parameter server has a parameter [/a/b]
+ * This function parameter server's searchParam feature to search up the tree
+ * for a parameter.  For example, if the parameter server has a parameter [/a/b]
  * and you specify the namespace [/a/c/d], searching for the parameter "b" will
- * yield [/a/b].  If [/a/c/d/b] existed, that parameter would be returned instead.
+ * yield [/a/b].  If [/a/c/d/b] existed, that parameter would be returned
+ * instead.
  *
  * \param key the parameter to search for
  * \param [out] result the found value (if any)
@@ -615,13 +638,10 @@ ROSCPP_DECL void unsubscribeCachedParam(void);
  * \return true if the parameter was retrieved from the server, false otherwise.
  * \throws InvalidNameException if the key is not a valid graph resource name
  */
-template<typename T>
-bool param(const std::string& param_name, T& param_val, const T& default_val)
-{
-  if (has(param_name))
-  {
-    if (get(param_name, param_val))
-    {
+template <typename T>
+bool param(const std::string& param_name, T& param_val, const T& default_val) {
+  if (has(param_name)) {
+    if (get(param_name, param_val)) {
       return true;
     }
   }
@@ -647,16 +667,15 @@ bool param(const std::string& param_name, T& param_val, const T& default_val)
  *
  * \throws InvalidNameException If the key is not a valid graph resource name.
  */
-template<typename T>
-T param(const std::string& param_name, const T& default_val)
-{
+template <typename T>
+T param(const std::string& param_name, const T& default_val) {
   T param_val;
   param(param_name, param_val, default_val);
   return param_val;
 }
 
-} // namespace param
+}  // namespace param
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_PARAM_H
+#endif  // ROSCPP_PARAM_H

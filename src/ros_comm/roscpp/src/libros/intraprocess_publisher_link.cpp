@@ -33,34 +33,30 @@
  */
 
 #include "ros/intraprocess_publisher_link.h"
-#include "ros/intraprocess_subscriber_link.h"
-#include "ros/subscription.h"
-#include "ros/header.h"
-#include "ros/connection.h"
-#include "ros/transport/transport.h"
-#include "ros/this_node.h"
-#include "ros/connection_manager.h"
-#include "ros/file_log.h"
 
 #include <boost/bind.hpp>
-
 #include <sstream>
 
-namespace ros
-{
+#include "ros/connection.h"
+#include "ros/connection_manager.h"
+#include "ros/file_log.h"
+#include "ros/header.h"
+#include "ros/intraprocess_subscriber_link.h"
+#include "ros/subscription.h"
+#include "ros/this_node.h"
+#include "ros/transport/transport.h"
 
-IntraProcessPublisherLink::IntraProcessPublisherLink(const SubscriptionPtr& parent, const std::string& xmlrpc_uri, const TransportHints& transport_hints)
-: PublisherLink(parent, xmlrpc_uri, transport_hints)
-, dropped_(false)
-{
-}
+namespace ros {
 
-IntraProcessPublisherLink::~IntraProcessPublisherLink()
-{
-}
+IntraProcessPublisherLink::IntraProcessPublisherLink(
+    const SubscriptionPtr& parent, const std::string& xmlrpc_uri,
+    const TransportHints& transport_hints)
+    : PublisherLink(parent, xmlrpc_uri, transport_hints), dropped_(false) {}
 
-void IntraProcessPublisherLink::setPublisher(const IntraProcessSubscriberLinkPtr& publisher)
-{
+IntraProcessPublisherLink::~IntraProcessPublisherLink() {}
+
+void IntraProcessPublisherLink::setPublisher(
+    const IntraProcessSubscriberLinkPtr& publisher) {
   publisher_ = publisher;
 
   SubscriptionPtr parent = parent_.lock();
@@ -77,37 +73,33 @@ void IntraProcessPublisherLink::setPublisher(const IntraProcessSubscriberLinkPtr
   setHeader(header);
 }
 
-void IntraProcessPublisherLink::drop()
-{
+void IntraProcessPublisherLink::drop() {
   {
     boost::recursive_mutex::scoped_lock lock(drop_mutex_);
-    if (dropped_)
-    {
+    if (dropped_) {
       return;
     }
 
     dropped_ = true;
   }
 
-  if (publisher_)
-  {
+  if (publisher_) {
     publisher_->drop();
     publisher_.reset();
   }
 
-  if (SubscriptionPtr parent = parent_.lock())
-  {
-    ROSCPP_LOG_DEBUG("Connection to local publisher on topic [%s] dropped", parent->getName().c_str());
+  if (SubscriptionPtr parent = parent_.lock()) {
+    ROSCPP_LOG_DEBUG("Connection to local publisher on topic [%s] dropped",
+                     parent->getName().c_str());
 
     parent->removePublisherLink(shared_from_this());
   }
 }
 
-void IntraProcessPublisherLink::handleMessage(const SerializedMessage& m, bool ser, bool nocopy)
-{
+void IntraProcessPublisherLink::handleMessage(const SerializedMessage& m,
+                                              bool ser, bool nocopy) {
   boost::recursive_mutex::scoped_lock lock(drop_mutex_);
-  if (dropped_)
-  {
+  if (dropped_) {
     return;
   }
 
@@ -116,44 +108,37 @@ void IntraProcessPublisherLink::handleMessage(const SerializedMessage& m, bool s
 
   SubscriptionPtr parent = parent_.lock();
 
-  if (parent)
-  {
-    stats_.drops_ += parent->handleMessage(m, ser, nocopy, header_.getValues(), shared_from_this());
+  if (parent) {
+    stats_.drops_ += parent->handleMessage(m, ser, nocopy, header_.getValues(),
+                                           shared_from_this());
   }
 }
 
-std::string IntraProcessPublisherLink::getTransportType()
-{
+std::string IntraProcessPublisherLink::getTransportType() {
   return std::string("INTRAPROCESS");
 }
 
-std::string IntraProcessPublisherLink::getTransportInfo()
-{
+std::string IntraProcessPublisherLink::getTransportInfo() {
   // TODO: Check if we can dump more useful information here
   return getTransportType();
 }
 
-void IntraProcessPublisherLink::getPublishTypes(bool& ser, bool& nocopy, const std::type_info& ti)
-{
+void IntraProcessPublisherLink::getPublishTypes(bool& ser, bool& nocopy,
+                                                const std::type_info& ti) {
   boost::recursive_mutex::scoped_lock lock(drop_mutex_);
-  if (dropped_)
-  {
+  if (dropped_) {
     ser = false;
     nocopy = false;
     return;
   }
 
   SubscriptionPtr parent = parent_.lock();
-  if (parent)
-  {
+  if (parent) {
     parent->getPublishTypes(ser, nocopy, ti);
-  }
-  else
-  {
+  } else {
     ser = true;
     nocopy = false;
   }
 }
 
-} // namespace ros
-
+}  // namespace ros

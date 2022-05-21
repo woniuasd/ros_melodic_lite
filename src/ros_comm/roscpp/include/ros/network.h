@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,24 +28,23 @@
 #ifndef ROSCPP_NETWORK_H
 #define ROSCPP_NETWORK_H
 
-#include "forwards.h"
 #include "common.h"
+#include "forwards.h"
 
-namespace ros
-{
+namespace ros {
 
 /**
  * \brief internal
  */
-namespace network
-{
+namespace network {
 
-ROSCPP_DECL bool splitURI(const std::string& uri, std::string& host, uint32_t& port);
+ROSCPP_DECL bool splitURI(const std::string& uri, std::string& host,
+                          uint32_t& port);
 ROSCPP_DECL const std::string& getHost();
 ROSCPP_DECL uint16_t getTCPROSPort();
 
-} // namespace network
+}  // namespace network
 
-} // namespace ros
+}  // namespace ros
 
 #endif

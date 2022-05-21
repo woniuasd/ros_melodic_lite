@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,65 +28,63 @@
 #ifndef ROSCPP_SERVICE_MESSAGE_HELPER_H
 #define ROSCPP_SERVICE_MESSAGE_HELPER_H
 
-#include "ros/forwards.h"
-#include "ros/common.h"
-#include "ros/message.h"
-#include "ros/message_traits.h"
-#include "ros/service_traits.h"
-#include "ros/serialization.h"
-
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/utility/enable_if.hpp>
 
-namespace ros
-{
-struct ROSCPP_DECL ServiceCallbackHelperCallParams
-{
+#include "ros/common.h"
+#include "ros/forwards.h"
+#include "ros/message.h"
+#include "ros/message_traits.h"
+#include "ros/serialization.h"
+#include "ros/service_traits.h"
+
+namespace ros {
+struct ROSCPP_DECL ServiceCallbackHelperCallParams {
   SerializedMessage request;
   SerializedMessage response;
   boost::shared_ptr<M_string> connection_header;
 };
 
-template<typename M>
-inline boost::shared_ptr<M> defaultServiceCreateFunction()
-{
+template <typename M>
+inline boost::shared_ptr<M> defaultServiceCreateFunction() {
   return boost::make_shared<M>();
 }
 
-template<typename MReq, typename MRes>
-struct ServiceSpecCallParams
-{
+template <typename MReq, typename MRes>
+struct ServiceSpecCallParams {
   boost::shared_ptr<MReq> request;
   boost::shared_ptr<MRes> response;
   boost::shared_ptr<M_string> connection_header;
 };
 
 /**
- * \brief Event type for services, ros::ServiceEvent<MReq, MRes>& can be used in your callback instead of MReq&, MRes&
+ * \brief Event type for services, ros::ServiceEvent<MReq, MRes>& can be used in
+ * your callback instead of MReq&, MRes&
  *
- * Useful if you need to retrieve meta-data about the call, such as the full connection header, or the caller's node name
+ * Useful if you need to retrieve meta-data about the call, such as the full
+ * connection header, or the caller's node name
  */
-template<typename MReq, typename MRes>
-class ServiceEvent
-{
-public:
+template <typename MReq, typename MRes>
+class ServiceEvent {
+ public:
   typedef MReq RequestType;
   typedef MRes ResponseType;
   typedef boost::shared_ptr<RequestType> RequestPtr;
   typedef boost::shared_ptr<ResponseType> ResponsePtr;
-  typedef boost::function<bool(ServiceEvent<RequestType, ResponseType>&)> CallbackType;
+  typedef boost::function<bool(ServiceEvent<RequestType, ResponseType>&)>
+      CallbackType;
 
-  static bool call(const CallbackType& cb, ServiceSpecCallParams<RequestType, ResponseType>& params)
-  {
-    ServiceEvent<RequestType, ResponseType> event(params.request, params.response, params.connection_header);
+  static bool call(const CallbackType& cb,
+                   ServiceSpecCallParams<RequestType, ResponseType>& params) {
+    ServiceEvent<RequestType, ResponseType> event(
+        params.request, params.response, params.connection_header);
     return cb(event);
   }
 
-  ServiceEvent(const boost::shared_ptr<MReq const>& req, const boost::shared_ptr<MRes>& res, const boost::shared_ptr<M_string>& connection_header)
-  : request_(req)
-  , response_(res)
-  , connection_header_(connection_header)
-  {}
+  ServiceEvent(const boost::shared_ptr<MReq const>& req,
+               const boost::shared_ptr<MRes>& res,
+               const boost::shared_ptr<M_string>& connection_header)
+      : request_(req), response_(res), connection_header_(connection_header) {}
 
   /**
    * \brief Returns a const-reference to the request
@@ -104,48 +102,49 @@ public:
   /**
    * \brief Returns the name of the node which called this service
    */
-  const std::string& getCallerName() const { return (*connection_header_)["callerid"]; }
-private:
+  const std::string& getCallerName() const {
+    return (*connection_header_)["callerid"];
+  }
+
+ private:
   boost::shared_ptr<RequestType const> request_;
   boost::shared_ptr<ResponseType> response_;
   boost::shared_ptr<M_string> connection_header_;
 };
 
-template<typename MReq, typename MRes>
-struct ServiceSpec
-{
+template <typename MReq, typename MRes>
+struct ServiceSpec {
   typedef MReq RequestType;
   typedef MRes ResponseType;
   typedef boost::shared_ptr<RequestType> RequestPtr;
   typedef boost::shared_ptr<ResponseType> ResponsePtr;
   typedef boost::function<bool(RequestType&, ResponseType&)> CallbackType;
 
-  static bool call(const CallbackType& cb, ServiceSpecCallParams<RequestType, ResponseType>& params)
-  {
+  static bool call(const CallbackType& cb,
+                   ServiceSpecCallParams<RequestType, ResponseType>& params) {
     return cb(*params.request, *params.response);
   }
 };
 
 /**
- * \brief Abstract base class used by service servers to deal with concrete message types through a common
- * interface.  This is one part of the roscpp API that is \b not fully stable, so overloading this class
- * is not recommended
+ * \brief Abstract base class used by service servers to deal with concrete
+ * message types through a common interface.  This is one part of the roscpp API
+ * that is \b not fully stable, so overloading this class is not recommended
  */
-class ROSCPP_DECL ServiceCallbackHelper
-{
-public:
+class ROSCPP_DECL ServiceCallbackHelper {
+ public:
   virtual ~ServiceCallbackHelper() {}
   virtual bool call(ServiceCallbackHelperCallParams& params) = 0;
 };
 typedef boost::shared_ptr<ServiceCallbackHelper> ServiceCallbackHelperPtr;
 
 /**
- * \brief Concrete generic implementation of ServiceCallbackHelper for any normal service type
+ * \brief Concrete generic implementation of ServiceCallbackHelper for any
+ * normal service type
  */
-template<typename Spec>
-class ServiceCallbackHelperT : public ServiceCallbackHelper
-{
-public:
+template <typename Spec>
+class ServiceCallbackHelperT : public ServiceCallbackHelper {
+ public:
   typedef typename Spec::RequestType RequestType;
   typedef typename Spec::ResponseType ResponseType;
   typedef typename Spec::RequestPtr RequestPtr;
@@ -154,21 +153,17 @@ public:
   typedef boost::function<RequestPtr()> ReqCreateFunction;
   typedef boost::function<ResponsePtr()> ResCreateFunction;
 
-  ServiceCallbackHelperT(const Callback& callback, 
-                         const ReqCreateFunction& create_req = 
-                         // these static casts are legally unnecessary, but
-                         // here to keep clang 2.8 from getting confused
-                         static_cast<RequestPtr(*)()>(defaultServiceCreateFunction<RequestType>), 
-                         const ResCreateFunction& create_res = 
-                         static_cast<ResponsePtr(*)()>(defaultServiceCreateFunction<ResponseType>))
-  : callback_(callback)
-  , create_req_(create_req)
-  , create_res_(create_res)
-  {
-  }
+  ServiceCallbackHelperT(
+      const Callback& callback,
+      const ReqCreateFunction& create_req =
+          // these static casts are legally unnecessary, but
+          // here to keep clang 2.8 from getting confused
+      static_cast<RequestPtr (*)()>(defaultServiceCreateFunction<RequestType>),
+      const ResCreateFunction& create_res = static_cast<ResponsePtr (*)()>(
+          defaultServiceCreateFunction<ResponseType>))
+      : callback_(callback), create_req_(create_req), create_res_(create_res) {}
 
-  virtual bool call(ServiceCallbackHelperCallParams& params)
-  {
+  virtual bool call(ServiceCallbackHelperCallParams& params) {
     namespace ser = serialization;
     RequestPtr req(create_req_());
     ResponsePtr res(create_res_());
@@ -184,12 +179,12 @@ public:
     return ok;
   }
 
-private:
+ private:
   Callback callback_;
   ReqCreateFunction create_req_;
   ResCreateFunction create_res_;
 };
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_SERVICE_MESSAGE_HELPER_H
+#endif  // ROSCPP_SERVICE_MESSAGE_HELPER_H

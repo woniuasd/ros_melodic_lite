@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,24 +28,23 @@
 #ifndef ROSCPP_FORWARDS_H
 #define ROSCPP_FORWARDS_H
 
-#include <string>
-#include <vector>
+#include <ros/macros.h>
+#include <ros/time.h>
+
+#include <boost/function.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
+#include <list>
 #include <map>
 #include <set>
-#include <list>
+#include <string>
+#include <vector>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/function.hpp>
-
-#include <ros/time.h>
-#include <ros/macros.h>
 #include "exceptions.h"
 #include "ros/datatypes.h"
 
-namespace ros
-{
+namespace ros {
 
 typedef boost::shared_ptr<void> VoidPtr;
 typedef boost::weak_ptr<void> VoidWPtr;
@@ -90,28 +89,26 @@ typedef boost::shared_ptr<Transport> TransportPtr;
 class NodeHandle;
 typedef boost::shared_ptr<NodeHandle> NodeHandlePtr;
 
-
 class SingleSubscriberPublisher;
-typedef boost::function<void(const SingleSubscriberPublisher&)> SubscriberStatusCallback;
+typedef boost::function<void(const SingleSubscriberPublisher&)>
+    SubscriberStatusCallback;
 
 class CallbackQueue;
 class CallbackQueueInterface;
 class CallbackInterface;
 typedef boost::shared_ptr<CallbackInterface> CallbackInterfacePtr;
 
-struct SubscriberCallbacks
-{
-  SubscriberCallbacks(const SubscriberStatusCallback& connect = SubscriberStatusCallback(),
-                      const SubscriberStatusCallback& disconnect = SubscriberStatusCallback(),
-                      const VoidConstPtr& tracked_object = VoidConstPtr(),
-                      CallbackQueueInterface* callback_queue = 0)
-  : connect_(connect)
-  , disconnect_(disconnect)
-  , callback_queue_(callback_queue)
-  {
+struct SubscriberCallbacks {
+  SubscriberCallbacks(
+      const SubscriberStatusCallback& connect = SubscriberStatusCallback(),
+      const SubscriberStatusCallback& disconnect = SubscriberStatusCallback(),
+      const VoidConstPtr& tracked_object = VoidConstPtr(),
+      CallbackQueueInterface* callback_queue = 0)
+      : connect_(connect),
+        disconnect_(disconnect),
+        callback_queue_(callback_queue) {
     has_tracked_object_ = false;
-    if (tracked_object)
-    {
+    if (tracked_object) {
       has_tracked_object_ = true;
       tracked_object_ = tracked_object;
     }
@@ -126,61 +123,75 @@ struct SubscriberCallbacks
 typedef boost::shared_ptr<SubscriberCallbacks> SubscriberCallbacksPtr;
 
 /**
- * \brief Structure passed as a parameter to the callback invoked by a ros::Timer
+ * \brief Structure passed as a parameter to the callback invoked by a
+ * ros::Timer
  */
-struct TimerEvent
-{
-  Time last_expected;                     ///< In a perfect world, this is when the last callback should have happened
-  Time last_real;                         ///< When the last callback actually happened
-  Time last_expired;                      ///< When the last timer actually expired and the callback was added to the queue
+struct TimerEvent {
+  Time last_expected;  ///< In a perfect world, this is when the last callback
+                       ///< should have happened
+  Time last_real;      ///< When the last callback actually happened
+  Time last_expired;  ///< When the last timer actually expired and the callback
+                      ///< was added to the queue
 
-  Time current_expected;                  ///< In a perfect world, this is when the current callback should be happening
-  Time current_real;                      ///< This is when the current callback was actually called (Time::now() as of the beginning of the callback)
-  Time current_expired;                   ///< When the current timer actually expired and the callback was added to the queue
+  Time current_expected;  ///< In a perfect world, this is when the current
+                          ///< callback should be happening
+  Time current_real;  ///< This is when the current callback was actually called
+                      ///< (Time::now() as of the beginning of the callback)
+  Time current_expired;  ///< When the current timer actually expired and the
+                         ///< callback was added to the queue
 
-  struct
-  {
-    WallDuration last_duration;           ///< How long the last callback ran for
+  struct {
+    WallDuration last_duration;  ///< How long the last callback ran for
   } profile;
 };
 typedef boost::function<void(const TimerEvent&)> TimerCallback;
 
 /**
- * \brief Structure passed as a parameter to the callback invoked by a ros::WallTimer
+ * \brief Structure passed as a parameter to the callback invoked by a
+ * ros::WallTimer
  */
-struct WallTimerEvent
-{
-  WallTime last_expected;                 ///< In a perfect world, this is when the last callback should have happened
-  WallTime last_real;                     ///< When the last callback actually happened
-  WallTime last_expired;                  ///< When the last timer actually expired and the callback was added to the queue
+struct WallTimerEvent {
+  WallTime last_expected;  ///< In a perfect world, this is when the last
+                           ///< callback should have happened
+  WallTime last_real;      ///< When the last callback actually happened
+  WallTime last_expired;   ///< When the last timer actually expired and the
+                           ///< callback was added to the queue
 
-  WallTime current_expected;              ///< In a perfect world, this is when the current callback should be happening
-  WallTime current_real;                  ///< This is when the current callback was actually called (Time::now() as of the beginning of the callback)
-  WallTime current_expired;               ///< When the current timer actually expired and the callback was added to the queue
+  WallTime current_expected;  ///< In a perfect world, this is when the current
+                              ///< callback should be happening
+  WallTime
+      current_real;  ///< This is when the current callback was actually called
+                     ///< (Time::now() as of the beginning of the callback)
+  WallTime current_expired;  ///< When the current timer actually expired and
+                             ///< the callback was added to the queue
 
-  struct
-  {
-    WallDuration last_duration;           ///< How long the last callback ran for
+  struct {
+    WallDuration last_duration;  ///< How long the last callback ran for
   } profile;
 };
 typedef boost::function<void(const WallTimerEvent&)> WallTimerCallback;
 
 /**
- * \brief Structure passed as a parameter to the callback invoked by a ros::SteadyTimer
+ * \brief Structure passed as a parameter to the callback invoked by a
+ * ros::SteadyTimer
  */
-struct SteadyTimerEvent
-{
-  SteadyTime last_expected;            ///< In a perfect world, this is when the last callback should have happened
-  SteadyTime last_real;                ///< When the last callback actually happened
-  SteadyTime last_expired;             ///< When the last timer actually expired and the callback was added to the queue
+struct SteadyTimerEvent {
+  SteadyTime last_expected;  ///< In a perfect world, this is when the last
+                             ///< callback should have happened
+  SteadyTime last_real;      ///< When the last callback actually happened
+  SteadyTime last_expired;   ///< When the last timer actually expired and the
+                             ///< callback was added to the queue
 
-  SteadyTime current_expected;         ///< In a perfect world, this is when the current callback should be happening
-  SteadyTime current_real;             ///< This is when the current callback was actually called (SteadyTime::now() as of the beginning of the callback)
-  SteadyTime current_expired;          ///< When the current timer actually expired and the callback was added to the queue
+  SteadyTime current_expected;  ///< In a perfect world, this is when the
+                                ///< current callback should be happening
+  SteadyTime current_real;  ///< This is when the current callback was actually
+                            ///< called (SteadyTime::now() as of the beginning
+                            ///< of the callback)
+  SteadyTime current_expired;  ///< When the current timer actually expired and
+                               ///< the callback was added to the queue
 
-  struct
-  {
-    WallDuration last_duration;           ///< How long the last callback ran for
+  struct {
+    WallDuration last_duration;  ///< How long the last callback ran for
   } profile;
 };
 typedef boost::function<void(const SteadyTimerEvent&)> SteadyTimerCallback;
@@ -196,6 +207,6 @@ typedef boost::shared_ptr<XMLRPCManager> XMLRPCManagerPtr;
 class PollManager;
 typedef boost::shared_ptr<PollManager> PollManagerPtr;
 
-}
+}  // namespace ros
 
 #endif

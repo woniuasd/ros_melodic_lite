@@ -35,28 +35,28 @@
 #ifndef ROSCPP_POLL_SET_H
 #define ROSCPP_POLL_SET_H
 
-#include <vector>
-#include "io.h"
-#include "common.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
+#include <vector>
 
-namespace ros
-{
+#include "common.h"
+#include "io.h"
+
+namespace ros {
 
 class Transport;
 typedef boost::shared_ptr<Transport> TransportPtr;
 
 /**
- * \brief Manages a set of sockets being polled through the poll() function call.
+ * \brief Manages a set of sockets being polled through the poll() function
+ * call.
  *
- * PollSet provides thread-safe ways of adding and deleting sockets, as well as adding
- * and deleting events.
+ * PollSet provides thread-safe ways of adding and deleting sockets, as well as
+ * adding and deleting events.
  */
-class ROSCPP_DECL PollSet
-{
-public:
+class ROSCPP_DECL PollSet {
+ public:
   PollSet();
   ~PollSet();
 
@@ -67,10 +67,12 @@ public:
    * addSocket() may be called from any thread.
    * \param sock The socket to add
    * \param update_func The function to call when a socket has events
-   * \param transport The (optional) transport associated with this socket. Mainly
-   * used to prevent the transport from being deleted while we're calling the update function
+   * \param transport The (optional) transport associated with this socket.
+   * Mainly used to prevent the transport from being deleted while we're calling
+   * the update function
    */
-  bool addSocket(int sock, const SocketUpdateFunc& update_func, const TransportPtr& transport = TransportPtr());
+  bool addSocket(int sock, const SocketUpdateFunc& update_func,
+                 const TransportPtr& transport = TransportPtr());
   /**
    * \brief Delete a socket
    *
@@ -104,19 +106,19 @@ public:
    *
    * update() may only be called from one thread at a time
    *
-   * \param poll_timeout The time, in milliseconds, for the poll() call to timeout after
-   * if there are no events.  Note that this does not provide an upper bound for the entire
-   * function, just the call to poll()
+   * \param poll_timeout The time, in milliseconds, for the poll() call to
+   * timeout after if there are no events.  Note that this does not provide an
+   * upper bound for the entire function, just the call to poll()
    */
   void update(int poll_timeout);
 
   /**
-   * \brief Signal our poll() call to finish if it's blocked waiting (see the poll_timeout
-   * option for update()).
+   * \brief Signal our poll() call to finish if it's blocked waiting (see the
+   * poll_timeout option for update()).
    */
   void signal();
 
-private:
+ private:
   /**
    * \brief Creates the native pollset for our sockets, if any have changed
    */
@@ -127,8 +129,7 @@ private:
    */
   void onLocalPipeEvents(int events);
 
-  struct SocketInfo
-  {
+  struct SocketInfo {
     TransportPtr transport_;
     SocketUpdateFunc func_;
     int fd_;
@@ -151,6 +152,6 @@ private:
   int epfd_;
 };
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_POLL_SET_H
+#endif  // ROSCPP_POLL_SET_H

@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -29,11 +29,10 @@
 #define ROSCPP_TRANSPORT_PUBLISHER_LINK_H
 
 #include "common.h"
-#include "publisher_link.h"
 #include "connection.h"
+#include "publisher_link.h"
 
-namespace ros
-{
+namespace ros {
 class Header;
 class Message;
 class Subscription;
@@ -45,13 +44,14 @@ typedef boost::shared_ptr<Connection> ConnectionPtr;
 struct SteadyTimerEvent;
 
 /**
- * \brief Handles a connection to a single publisher on a given topic.  Receives messages from a publisher
- * and hands them off to its parent Subscription
+ * \brief Handles a connection to a single publisher on a given topic.  Receives
+ * messages from a publisher and hands them off to its parent Subscription
  */
-class ROSCPP_DECL TransportPublisherLink : public PublisherLink
-{
-public:
-  TransportPublisherLink(const SubscriptionPtr& parent, const std::string& xmlrpc_uri, const TransportHints& transport_hints);
+class ROSCPP_DECL TransportPublisherLink : public PublisherLink {
+ public:
+  TransportPublisherLink(const SubscriptionPtr& parent,
+                         const std::string& xmlrpc_uri,
+                         const TransportHints& transport_hints);
   virtual ~TransportPublisherLink();
 
   //
@@ -63,18 +63,24 @@ public:
   virtual std::string getTransportInfo();
   virtual void drop();
 
-private:
-  void onConnectionDropped(const ConnectionPtr& conn, Connection::DropReason reason);
+ private:
+  void onConnectionDropped(const ConnectionPtr& conn,
+                           Connection::DropReason reason);
   bool onHeaderReceived(const ConnectionPtr& conn, const Header& header);
 
   /**
-   * \brief Handles handing off a received message to the subscription, where it will be deserialized and called back
+   * \brief Handles handing off a received message to the subscription, where it
+   * will be deserialized and called back
    */
   virtual void handleMessage(const SerializedMessage& m, bool ser, bool nocopy);
 
   void onHeaderWritten(const ConnectionPtr& conn);
-  void onMessageLength(const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success);
-  void onMessage(const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success);
+  void onMessageLength(const ConnectionPtr& conn,
+                       const boost::shared_array<uint8_t>& buffer,
+                       uint32_t size, bool success);
+  void onMessage(const ConnectionPtr& conn,
+                 const boost::shared_array<uint8_t>& buffer, uint32_t size,
+                 bool success);
 
   void onRetryTimer(const ros::SteadyTimerEvent&);
 
@@ -88,9 +94,6 @@ private:
 };
 typedef boost::shared_ptr<TransportPublisherLink> TransportPublisherLinkPtr;
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_TRANSPORT_PUBLISHER_LINK_H
-
-
-
+#endif  // ROSCPP_TRANSPORT_PUBLISHER_LINK_H

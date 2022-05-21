@@ -37,13 +37,13 @@
 
 #include <ros/common.h>
 #include <ros/types.h>
+
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <vector>
 
-namespace ros
-{
+namespace ros {
 
 class Transport;
 typedef boost::shared_ptr<Transport> TransportPtr;
@@ -51,49 +51,54 @@ typedef boost::shared_ptr<Transport> TransportPtr;
 class Header;
 
 /**
- * \brief Abstract base class that allows abstraction of the transport type, eg. TCP, shared memory, UDP...
+ * \brief Abstract base class that allows abstraction of the transport type, eg.
+ * TCP, shared memory, UDP...
  */
-class ROSCPP_DECL Transport : public boost::enable_shared_from_this<Transport>
-{
-public:
+class ROSCPP_DECL Transport : public boost::enable_shared_from_this<Transport> {
+ public:
   Transport();
   virtual ~Transport() {}
 
   /**
-   * \brief Read a number of bytes into the supplied buffer.  Not guaranteed to actually read that number of bytes.
-   * \param buffer Buffer to read from
+   * \brief Read a number of bytes into the supplied buffer.  Not guaranteed to
+   * actually read that number of bytes. \param buffer Buffer to read from
    * \param size Size, in bytes, to read
    * \return The number of bytes actually read, or -1 if there was an error
    */
   virtual int32_t read(uint8_t* buffer, uint32_t size) = 0;
   /**
-   * \brief Write a number of bytes from the supplied buffer.  Not guaranteed to actually write that number of bytes.
-   * \param buffer Buffer to write from
+   * \brief Write a number of bytes from the supplied buffer.  Not guaranteed to
+   * actually write that number of bytes. \param buffer Buffer to write from
    * \param size Size, in bytes, to write
    * \return The number of bytes actually written, or -1 if there was an error
    */
   virtual int32_t write(uint8_t* buffer, uint32_t size) = 0;
 
   /**
-   * \brief Enable writing on this transport.  Allows derived classes to, for example, enable write polling for asynchronous sockets
+   * \brief Enable writing on this transport.  Allows derived classes to, for
+   * example, enable write polling for asynchronous sockets
    */
   virtual void enableWrite() = 0;
   /**
-   * \brief Disable writing on this transport.  Allows derived classes to, for example, disable write polling for asynchronous sockets
+   * \brief Disable writing on this transport.  Allows derived classes to, for
+   * example, disable write polling for asynchronous sockets
    */
   virtual void disableWrite() = 0;
 
   /**
-   * \brief Enable reading on this transport.  Allows derived classes to, for example, enable read polling for asynchronous sockets
+   * \brief Enable reading on this transport.  Allows derived classes to, for
+   * example, enable read polling for asynchronous sockets
    */
   virtual void enableRead() = 0;
   /**
-   * \brief Disable reading on this transport.  Allows derived classes to, for example, disable read polling for asynchronous sockets
+   * \brief Disable reading on this transport.  Allows derived classes to, for
+   * example, disable read polling for asynchronous sockets
    */
   virtual void disableRead() = 0;
 
   /**
-   * \brief Close this transport.  Once this call has returned, writing on this transport should always return an error.
+   * \brief Close this transport.  Once this call has returned, writing on this
+   * transport should always return an error.
    */
   virtual void close() = 0;
 
@@ -105,53 +110,60 @@ public:
 
   typedef boost::function<void(const TransportPtr&)> Callback;
   /**
-   * \brief Set the function to call when this transport has disconnected, either through a call to close(). Or a disconnect from the remote host.
+   * \brief Set the function to call when this transport has disconnected,
+   * either through a call to close(). Or a disconnect from the remote host.
    */
   void setDisconnectCallback(const Callback& cb) { disconnect_cb_ = cb; }
   /**
-   * \brief Set the function to call when there is data available to be read by this transport
+   * \brief Set the function to call when there is data available to be read by
+   * this transport
    */
   void setReadCallback(const Callback& cb) { read_cb_ = cb; }
   /**
-   * \brief Set the function to call when there is space available to write on this transport
+   * \brief Set the function to call when there is space available to write on
+   * this transport
    */
   void setWriteCallback(const Callback& cb) { write_cb_ = cb; }
 
   /**
-   * \brief Returns a string description of both the type of transport and who the transport is connected to
+   * \brief Returns a string description of both the type of transport and who
+   * the transport is connected to
    */
   virtual std::string getTransportInfo() = 0;
 
   /**
-   * \brief Returns a boolean to indicate if the transport mechanism is reliable or not
+   * \brief Returns a boolean to indicate if the transport mechanism is reliable
+   * or not
    */
-  virtual bool requiresHeader() {return true;}
+  virtual bool requiresHeader() { return true; }
 
   /**
-   * \brief Provides an opportunity for transport-specific options to come in through the header
+   * \brief Provides an opportunity for transport-specific options to come in
+   * through the header
    */
   virtual void parseHeader(const Header& header) { (void)header; }
 
-protected:
+ protected:
   Callback disconnect_cb_;
   Callback read_cb_;
   Callback write_cb_;
 
   /**
-   * \brief returns true if the transport is allowed to connect to the host passed to it.
+   * \brief returns true if the transport is allowed to connect to the host
+   * passed to it.
    */
-  bool isHostAllowed(const std::string &host) const;
+  bool isHostAllowed(const std::string& host) const;
 
   /**
    * \brief returns true if this transport is only allowed to talk to localhost
    */
   bool isOnlyLocalhostAllowed() const { return only_localhost_allowed_; }
 
-private:
+ private:
   bool only_localhost_allowed_;
   std::vector<std::string> allowed_hosts_;
 };
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_TRANSPORT_H
+#endif  // ROSCPP_TRANSPORT_H

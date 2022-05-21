@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -30,24 +30,25 @@
 
 // #warning You should not be using this file
 
-#include "ros/macros.h"
-#include "ros/assert.h"
-#include <string>
-#include <string.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/array.hpp>
 #include <stdint.h>
+#include <string.h>
 
+#include <boost/array.hpp>
+#include <boost/shared_ptr.hpp>
+#include <string>
+
+#include "ros/assert.h"
+#include "ros/macros.h"
 
 #define ROSCPP_MESSAGE_HAS_DEFINITION
 
-namespace ros
-{
+namespace ros {
 
 typedef std::map<std::string, std::string> M_string;
 
 /**
- * \deprecated This base-class is deprecated in favor of a template-based serialization and traits system
+ * \deprecated This base-class is deprecated in favor of a template-based
+ * serialization and traits system
  */
 #if 0
 class Message
@@ -77,12 +78,31 @@ typedef boost::shared_ptr<Message> MessagePtr;
 typedef boost::shared_ptr<Message const> MessageConstPtr;
 #endif
 
-#define SROS_SERIALIZE_PRIMITIVE(ptr, data) { memcpy(ptr, &data, sizeof(data)); ptr += sizeof(data); }
-#define SROS_SERIALIZE_BUFFER(ptr, data, data_size) { if (data_size > 0) { memcpy(ptr, data, data_size); ptr += data_size; } }
-#define SROS_DESERIALIZE_PRIMITIVE(ptr, data) { memcpy(&data, ptr, sizeof(data)); ptr += sizeof(data); }
-#define SROS_DESERIALIZE_BUFFER(ptr, data, data_size) { if (data_size > 0) { memcpy(data, ptr, data_size); ptr += data_size; } }
+#define SROS_SERIALIZE_PRIMITIVE(ptr, data) \
+  {                                         \
+    memcpy(ptr, &data, sizeof(data));       \
+    ptr += sizeof(data);                    \
+  }
+#define SROS_SERIALIZE_BUFFER(ptr, data, data_size) \
+  {                                                 \
+    if (data_size > 0) {                            \
+      memcpy(ptr, data, data_size);                 \
+      ptr += data_size;                             \
+    }                                               \
+  }
+#define SROS_DESERIALIZE_PRIMITIVE(ptr, data) \
+  {                                           \
+    memcpy(&data, ptr, sizeof(data));         \
+    ptr += sizeof(data);                      \
+  }
+#define SROS_DESERIALIZE_BUFFER(ptr, data, data_size) \
+  {                                                   \
+    if (data_size > 0) {                              \
+      memcpy(data, ptr, data_size);                   \
+      ptr += data_size;                               \
+    }                                                 \
+  }
 
-}
+}  // namespace ros
 
 #endif
-

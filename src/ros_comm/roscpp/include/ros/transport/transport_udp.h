@@ -35,15 +35,15 @@
 #ifndef ROSCPP_TRANSPORT_UDP_H
 #define ROSCPP_TRANSPORT_UDP_H
 
-#include <ros/types.h>
+#include <ros/common.h>
 #include <ros/transport/transport.h>
+#include <ros/types.h>
 
 #include <boost/thread/mutex.hpp>
-#include "ros/io.h"
-#include <ros/common.h>
 
-namespace ros
-{
+#include "ros/io.h"
+
+namespace ros {
 
 class TransportUDP;
 typedef boost::shared_ptr<TransportUDP> TransportUDPPtr;
@@ -64,12 +64,10 @@ typedef struct TransportUDPHeader {
 /**
  * \brief UDPROS transport
  */
-class ROSCPP_DECL TransportUDP : public Transport
-{
-public:
-  enum Flags
-  {
-    SYNCHRONOUS = 1<<0,
+class ROSCPP_DECL TransportUDP : public Transport {
+ public:
+  enum Flags {
+    SYNCHRONOUS = 1 << 0,
   };
 
   TransportUDP(PollSet* poll_set, int flags = 0, int max_datagram_size = 0);
@@ -96,11 +94,12 @@ public:
   /**
    * \brief Create a connection to a server socket.
    */
-  TransportUDPPtr createOutgoing(std::string host, int port, int conn_id, int max_datagram_size);
+  TransportUDPPtr createOutgoing(std::string host, int port, int conn_id,
+                                 int max_datagram_size);
   /**
    * \brief Returns the port this transport is listening on
    */
-  int getServerPort() const {return server_port_;}
+  int getServerPort() const { return server_port_; }
 
   // overrides from Transport
   virtual int32_t read(uint8_t* buffer, uint32_t size);
@@ -115,15 +114,16 @@ public:
 
   virtual std::string getTransportInfo();
 
-  virtual bool requiresHeader() {return false;}
+  virtual bool requiresHeader() { return false; }
 
-  virtual const char* getType() {return "UDPROS";}
+  virtual const char* getType() { return "UDPROS"; }
 
-  int getMaxDatagramSize() const {return max_datagram_size_;}
+  int getMaxDatagramSize() const { return max_datagram_size_; }
 
-private:
+ private:
   /**
-   * \brief Initializes the assigned socket -- sets it to non-blocking and enables reading
+   * \brief Initializes the assigned socket -- sets it to non-blocking and
+   * enables reading
    */
   bool initializeSocket();
 
@@ -171,7 +171,6 @@ private:
   uint32_t reorder_bytes_;
 };
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_TRANSPORT_UDP_H
-
+#endif  // ROSCPP_TRANSPORT_UDP_H

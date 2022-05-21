@@ -36,23 +36,22 @@
 #define ROSCPP_CALLBACK_QUEUE_INTERFACE_H
 
 #include <boost/shared_ptr.hpp>
+
 #include "common.h"
 #include "ros/types.h"
 
-namespace ros
-{
+namespace ros {
 
 /**
- * \brief Abstract interface for items which can be added to a CallbackQueueInterface
+ * \brief Abstract interface for items which can be added to a
+ * CallbackQueueInterface
  */
-class ROSCPP_DECL CallbackInterface
-{
-public:
+class ROSCPP_DECL CallbackInterface {
+ public:
   /**
    * \brief Possible results for the call() method
    */
-  enum CallResult
-  {
+  enum CallResult {
     Success,   ///< Call succeeded
     TryAgain,  ///< Call not ready, try again later
     Invalid,   ///< Call no longer valid
@@ -66,29 +65,30 @@ public:
    */
   virtual CallResult call() = 0;
   /**
-   * \brief Provides the opportunity for specifying that a callback is not ready to be called
-   * before call() actually takes place.
+   * \brief Provides the opportunity for specifying that a callback is not ready
+   * to be called before call() actually takes place.
    */
   virtual bool ready() { return true; }
 };
 typedef boost::shared_ptr<CallbackInterface> CallbackInterfacePtr;
 
 /**
- * \brief Abstract interface for a queue used to handle all callbacks within roscpp.
+ * \brief Abstract interface for a queue used to handle all callbacks within
+ * roscpp.
  *
- * Allows you to inherit and provide your own implementation that can be used instead of our
- * default CallbackQueue
+ * Allows you to inherit and provide your own implementation that can be used
+ * instead of our default CallbackQueue
  */
-class CallbackQueueInterface
-{
-public:
+class CallbackQueueInterface {
+ public:
   virtual ~CallbackQueueInterface() {}
 
   /**
-   * \brief Add a callback, with an optional owner id.  The owner id can be used to
-   * remove a set of callbacks from this queue.
+   * \brief Add a callback, with an optional owner id.  The owner id can be used
+   * to remove a set of callbacks from this queue.
    */
-  virtual void addCallback(const CallbackInterfacePtr& callback, uint64_t owner_id = 0) = 0;
+  virtual void addCallback(const CallbackInterfacePtr& callback,
+                           uint64_t owner_id = 0) = 0;
 
   /**
    * \brief Remove all callbacks associated with an owner id
@@ -96,6 +96,6 @@ public:
   virtual void removeByID(uint64_t owner_id) = 0;
 };
 
-}
+}  // namespace ros
 
 #endif

@@ -35,36 +35,33 @@
 #ifndef ROSCPP_CALLBACK_QUEUE_H
 #define ROSCPP_CALLBACK_QUEUE_H
 
-#include "ros/callback_queue_interface.h"
-#include "ros/internal/condition_variable.h"
-#include "ros/time.h"
-#include "common.h"
-
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/tss.hpp>
-
-#include <list>
 #include <deque>
+#include <list>
 
-namespace ros
-{
+#include "common.h"
+#include "ros/callback_queue_interface.h"
+#include "ros/internal/condition_variable.h"
+#include "ros/time.h"
+
+namespace ros {
 
 /**
  * \brief This is the default implementation of the ros::CallbackQueueInterface
  */
-class ROSCPP_DECL CallbackQueue : public CallbackQueueInterface
-{
-public:
+class ROSCPP_DECL CallbackQueue : public CallbackQueueInterface {
+ public:
   CallbackQueue(bool enabled = true);
   virtual ~CallbackQueue();
 
-  virtual void addCallback(const CallbackInterfacePtr& callback, uint64_t removal_id = 0);
+  virtual void addCallback(const CallbackInterfacePtr& callback,
+                           uint64_t removal_id = 0);
   virtual void removeByID(uint64_t removal_id);
 
-  enum CallOneResult
-  {
+  enum CallOneResult {
     Called,
     TryAgain,
     Disabled,
@@ -72,37 +69,36 @@ public:
   };
 
   /**
-   * \brief Pop a single callback off the front of the queue and invoke it.  If the callback was not ready to be called,
-   * pushes it back onto the queue.
+   * \brief Pop a single callback off the front of the queue and invoke it.  If
+   * the callback was not ready to be called, pushes it back onto the queue.
    */
-  CallOneResult callOne()
-  {
-    return callOne(ros::WallDuration());
-  }
+  CallOneResult callOne() { return callOne(ros::WallDuration()); }
 
   /**
-   * \brief Pop a single callback off the front of the queue and invoke it.  If the callback was not ready to be called,
-   * pushes it back onto the queue.  This version includes a timeout which lets you specify the amount of time to wait for
-   * a callback to be available before returning.
+   * \brief Pop a single callback off the front of the queue and invoke it.  If
+   * the callback was not ready to be called, pushes it back onto the queue.
+   * This version includes a timeout which lets you specify the amount of time
+   * to wait for a callback to be available before returning.
    *
-   * \param timeout The amount of time to wait for a callback to be available.  If there is already a callback available,
-   * this parameter does nothing.
+   * \param timeout The amount of time to wait for a callback to be available.
+   * If there is already a callback available, this parameter does nothing.
    */
   CallOneResult callOne(ros::WallDuration timeout);
 
   /**
-   * \brief Invoke all callbacks currently in the queue.  If a callback was not ready to be called, pushes it back onto the queue.
+   * \brief Invoke all callbacks currently in the queue.  If a callback was not
+   * ready to be called, pushes it back onto the queue.
    */
-  void callAvailable()
-  {
-    callAvailable(ros::WallDuration());
-  }
+  void callAvailable() { callAvailable(ros::WallDuration()); }
   /**
-   * \brief Invoke all callbacks currently in the queue.  If a callback was not ready to be called, pushes it back onto the queue.  This version
-   * includes a timeout which lets you specify the amount of time to wait for a callback to be available before returning.
+   * \brief Invoke all callbacks currently in the queue.  If a callback was not
+   * ready to be called, pushes it back onto the queue.  This version includes a
+   * timeout which lets you specify the amount of time to wait for a callback to
+   * be available before returning.
    *
-   * \param timeout The amount of time to wait for at least one callback to be available.  If there is already at least one callback available,
-   * this parameter does nothing.
+   * \param timeout The amount of time to wait for at least one callback to be
+   * available.  If there is already at least one callback available, this
+   * parameter does nothing.
    */
   void callAvailable(ros::WallDuration timeout);
 
@@ -115,7 +111,8 @@ public:
    */
   bool isEmpty();
   /**
-   * \brief Removes all callbacks from the queue.  Does \b not wait for calls currently in progress to finish.
+   * \brief Removes all callbacks from the queue.  Does \b not wait for calls
+   * currently in progress to finish.
    */
   void clear();
 
@@ -124,7 +121,8 @@ public:
    */
   void enable();
   /**
-   * \brief Disable the queue, meaning any calls to addCallback() will have no effect
+   * \brief Disable the queue, meaning any calls to addCallback() will have no
+   * effect
    */
   void disable();
   /**
@@ -132,14 +130,13 @@ public:
    */
   bool isEnabled();
 
-protected:
+ protected:
   void setupTLS();
 
   struct TLS;
   CallOneResult callOneCB(TLS* tls);
 
-  struct IDInfo
-  {
+  struct IDInfo {
     uint64_t id;
     boost::shared_mutex calling_rw_mutex;
   };
@@ -148,12 +145,8 @@ protected:
 
   IDInfoPtr getIDInfo(uint64_t id);
 
-  struct CallbackInfo
-  {
-    CallbackInfo()
-    : removal_id(0)
-    , marked_for_removal(false)
-    {}
+  struct CallbackInfo {
+    CallbackInfo() : removal_id(0), marked_for_removal(false) {}
     CallbackInterfacePtr callback;
     uint64_t removal_id;
     bool marked_for_removal;
@@ -168,12 +161,10 @@ protected:
   boost::mutex id_info_mutex_;
   M_IDInfo id_info_;
 
-  struct TLS
-  {
+  struct TLS {
     TLS()
-    : calling_in_this_thread(0xffffffffffffffffULL)
-    , cb_it(callbacks.end())
-    {}
+        : calling_in_this_thread(0xffffffffffffffffULL),
+          cb_it(callbacks.end()) {}
     uint64_t calling_in_this_thread;
     D_CallbackInfo callbacks;
     D_CallbackInfo::iterator cb_it;
@@ -184,6 +175,6 @@ protected:
 };
 typedef boost::shared_ptr<CallbackQueue> CallbackQueuePtr;
 
-}
+}  // namespace ros
 
 #endif

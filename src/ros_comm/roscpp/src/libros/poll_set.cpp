@@ -33,38 +33,34 @@
  */
 
 #include "ros/poll_set.h"
-#include "ros/file_log.h"
 
-#include "ros/transport/transport.h"
-
+#include <fcntl.h>
 #include <ros/assert.h>
 
 #include <boost/bind.hpp>
 
-#include <fcntl.h>
+#include "ros/file_log.h"
+#include "ros/transport/transport.h"
 
-namespace ros
-{
+namespace ros {
 
-PollSet::PollSet()
-    : sockets_changed_(false), epfd_(create_socket_watcher())
-{
-	if ( create_signal_pair(signal_pipe_) != 0 ) {
-        ROS_FATAL("create_signal_pair() failed");
+PollSet::PollSet() : sockets_changed_(false), epfd_(create_socket_watcher()) {
+  if (create_signal_pair(signal_pipe_) != 0) {
+    ROS_FATAL("create_signal_pair() failed");
     ROS_BREAK();
   }
-  addSocket(signal_pipe_[0], boost::bind(&PollSet::onLocalPipeEvents, this, _1));
+  addSocket(signal_pipe_[0],
+            boost::bind(&PollSet::onLocalPipeEvents, this, _1));
   addEvents(signal_pipe_[0], POLLIN);
 }
 
-PollSet::~PollSet()
-{
+PollSet::~PollSet() {
   close_signal_pair(signal_pipe_);
   close_socket_watcher(epfd_);
 }
 
-bool PollSet::addSocket(int fd, const SocketUpdateFunc& update_func, const TransportPtr& transport)
-{
+bool PollSet::addSocket(int fd, const SocketUpdateFunc& update_func,
+                        const TransportPtr& transport) {
   SocketInfo info;
   info.fd_ = fd;
   info.events_ = 0;
@@ -75,8 +71,7 @@ bool PollSet::addSocket(int fd, const SocketUpdateFunc& update_func, const Trans
     boost::mutex::scoped_lock lock(socket_info_mutex_);
 
     bool b = socket_info_.insert(std::make_pair(fd, info)).second;
-    if (!b)
-    {
+    if (!b) {
       ROSCPP_LOG_DEBUG("PollSet: Tried to add duplicate fd [%d]", fd);
       return false;
     }
@@ -91,17 +86,14 @@ bool PollSet::addSocket(int fd, const SocketUpdateFunc& update_func, const Trans
   return true;
 }
 
-bool PollSet::delSocket(int fd)
-{
-  if(fd < 0)
-  {
+bool PollSet::delSocket(int fd) {
+  if (fd < 0) {
     return false;
   }
 
   boost::mutex::scoped_lock lock(socket_info_mutex_);
   M_SocketInfo::iterator it = socket_info_.find(fd);
-  if (it != socket_info_.end())
-  {
+  if (it != socket_info_.end()) {
     socket_info_.erase(it);
 
     {
@@ -117,21 +109,22 @@ bool PollSet::delSocket(int fd)
     return true;
   }
 
-  ROSCPP_LOG_DEBUG("PollSet: Tried to delete fd [%d] which is not being tracked", fd);
+  ROSCPP_LOG_DEBUG(
+      "PollSet: Tried to delete fd [%d] which is not being tracked", fd);
 
   return false;
 }
 
-
-bool PollSet::addEvents(int sock, int events)
-{
+bool PollSet::addEvents(int sock, int events) {
   boost::mutex::scoped_lock lock(socket_info_mutex_);
 
   M_SocketInfo::iterator it = socket_info_.find(sock);
 
-  if (it == socket_info_.end())
-  {
-    ROSCPP_LOG_DEBUG("PollSet: Tried to add events [%d] to fd [%d] which does not exist in this pollset", events, sock);
+  if (it == socket_info_.end()) {
+    ROSCPP_LOG_DEBUG(
+        "PollSet: Tried to add events [%d] to fd [%d] which does not exist in "
+        "this pollset",
+        events, sock);
     return false;
   }
 
@@ -145,18 +138,17 @@ bool PollSet::addEvents(int sock, int events)
   return true;
 }
 
-bool PollSet::delEvents(int sock, int events)
-{
+bool PollSet::delEvents(int sock, int events) {
   boost::mutex::scoped_lock lock(socket_info_mutex_);
 
   M_SocketInfo::iterator it = socket_info_.find(sock);
-  if (it != socket_info_.end())
-  {
+  if (it != socket_info_.end()) {
     it->second.events_ &= ~events;
-  }
-  else
-  {
-    ROSCPP_LOG_DEBUG("PollSet: Tried to delete events [%d] to fd [%d] which does not exist in this pollset", events, sock);
+  } else {
+    ROSCPP_LOG_DEBUG(
+        "PollSet: Tried to delete events [%d] to fd [%d] which does not exist "
+        "in this pollset",
+        events, sock);
     return false;
   }
 
@@ -168,91 +160,77 @@ bool PollSet::delEvents(int sock, int events)
   return true;
 }
 
-void PollSet::signal()
-{
+void PollSet::signal() {
   boost::mutex::scoped_try_lock lock(signal_mutex_);
 
-  if (lock.owns_lock())
-  {
+  if (lock.owns_lock()) {
     char b = 0;
-    if (write_signal(signal_pipe_[1], &b, 1) < 0)
-    {
+    if (write_signal(signal_pipe_[1], &b, 1) < 0) {
       // do nothing... this prevents warnings on gcc 4.3
     }
   }
 }
 
-
-void PollSet::update(int poll_timeout)
-{
+void PollSet::update(int poll_timeout) {
   createNativePollset();
 
   // Poll across the sockets we're servicing
-  boost::shared_ptr<std::vector<socket_pollfd> > ofds = poll_sockets(epfd_, &ufds_.front(), ufds_.size(), poll_timeout);
-  if (!ofds)
-  {
-    if (last_socket_error() != EINTR)
-    {
+  boost::shared_ptr<std::vector<socket_pollfd> > ofds =
+      poll_sockets(epfd_, &ufds_.front(), ufds_.size(), poll_timeout);
+  if (!ofds) {
+    if (last_socket_error() != EINTR) {
       ROS_ERROR_STREAM("poll failed with error " << last_socket_error_string());
     }
-  }
-  else
-  {
-    for (std::vector<socket_pollfd>::iterator it = ofds->begin() ; it != ofds->end(); ++it)
-    {
+  } else {
+    for (std::vector<socket_pollfd>::iterator it = ofds->begin();
+         it != ofds->end(); ++it) {
       int fd = it->fd;
       int revents = it->revents;
       SocketUpdateFunc func;
       TransportPtr transport;
       int events = 0;
 
-      if (revents == 0)
-      {
+      if (revents == 0) {
         continue;
       }
       {
         boost::mutex::scoped_lock lock(socket_info_mutex_);
         M_SocketInfo::iterator it = socket_info_.find(fd);
         // the socket has been entirely deleted
-        if (it == socket_info_.end())
-        {
+        if (it == socket_info_.end()) {
           continue;
         }
 
         const SocketInfo& info = it->second;
 
-        // Store off the function and transport in case the socket is deleted from another thread
+        // Store off the function and transport in case the socket is deleted
+        // from another thread
         func = info.func_;
         transport = info.transport_;
         events = info.events_;
       }
 
-      // If these are registered events for this socket, OR the events are ERR/HUP/NVAL,
-      // call through to the registered function
-      if (func
-          && ((events & revents)
-              || (revents & POLLERR)
-              || (revents & POLLHUP)
-              || (revents & POLLNVAL)))
-      {
+      // If these are registered events for this socket, OR the events are
+      // ERR/HUP/NVAL, call through to the registered function
+      if (func && ((events & revents) || (revents & POLLERR) ||
+                   (revents & POLLHUP) || (revents & POLLNVAL))) {
         bool skip = false;
-        if (revents & (POLLNVAL|POLLERR|POLLHUP))
-        {
-          // If a socket was just closed and then the file descriptor immediately reused, we can
-          // get in here with what we think is a valid socket (since it was just re-added to our set)
-          // but which is actually referring to the previous fd with the same #.  If this is the case,
-          // we ignore the first instance of one of these errors.  If it's a real error we'll
-          // hit it again next time through.
+        if (revents & (POLLNVAL | POLLERR | POLLHUP)) {
+          // If a socket was just closed and then the file descriptor
+          // immediately reused, we can get in here with what we think is a
+          // valid socket (since it was just re-added to our set) but which is
+          // actually referring to the previous fd with the same #.  If this is
+          // the case, we ignore the first instance of one of these errors.  If
+          // it's a real error we'll hit it again next time through.
           boost::mutex::scoped_lock lock(just_deleted_mutex_);
-          if (std::find(just_deleted_.begin(), just_deleted_.end(), fd) != just_deleted_.end())
-          {
+          if (std::find(just_deleted_.begin(), just_deleted_.end(), fd) !=
+              just_deleted_.end()) {
             skip = true;
           }
         }
 
-        if (!skip)
-        {
-          func(revents & (events|POLLERR|POLLHUP|POLLNVAL));
+        if (!skip) {
+          func(revents & (events | POLLERR | POLLHUP | POLLNVAL));
         }
       }
     }
@@ -260,24 +238,21 @@ void PollSet::update(int poll_timeout)
 
   boost::mutex::scoped_lock lock(just_deleted_mutex_);
   just_deleted_.clear();
-
 }
 
-void PollSet::createNativePollset()
-{
+void PollSet::createNativePollset() {
   boost::mutex::scoped_lock lock(socket_info_mutex_);
 
-  if (!sockets_changed_)
-  {
+  if (!sockets_changed_) {
     return;
   }
 
-  // Build the list of structures to pass to poll for the sockets we're servicing
+  // Build the list of structures to pass to poll for the sockets we're
+  // servicing
   ufds_.resize(socket_info_.size());
   M_SocketInfo::iterator sock_it = socket_info_.begin();
   M_SocketInfo::iterator sock_end = socket_info_.end();
-  for (int i = 0; sock_it != sock_end; ++sock_it, ++i)
-  {
+  for (int i = 0; sock_it != sock_end; ++sock_it, ++i) {
     const SocketInfo& info = sock_it->second;
     socket_pollfd& pfd = ufds_[i];
     pfd.fd = info.fd_;
@@ -287,17 +262,13 @@ void PollSet::createNativePollset()
   sockets_changed_ = false;
 }
 
-void PollSet::onLocalPipeEvents(int events)
-{
-  if(events & POLLIN)
-  {
+void PollSet::onLocalPipeEvents(int events) {
+  if (events & POLLIN) {
     char b;
-    while(read_signal(signal_pipe_[0], &b, 1) > 0)
-    {
-      //do nothing keep draining
+    while (read_signal(signal_pipe_[0], &b, 1) > 0) {
+      // do nothing keep draining
     };
   }
-
 }
 
-}
+}  // namespace ros

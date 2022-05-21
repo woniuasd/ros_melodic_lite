@@ -32,20 +32,17 @@
 #include "forwards.h"
 #include "timer_options.h"
 
-namespace ros
-{
+namespace ros {
 
 /**
  * \brief Manages a timer callback
  *
- * A Timer should always be created through a call to NodeHandle::createTimer(), or copied from one
- * that was. Once all copies of a specific
- * Timer go out of scope, the callback associated with that handle will stop
- * being called.
+ * A Timer should always be created through a call to NodeHandle::createTimer(),
+ * or copied from one that was. Once all copies of a specific Timer go out of
+ * scope, the callback associated with that handle will stop being called.
  */
-class ROSCPP_DECL Timer
-{
-public:
+class ROSCPP_DECL Timer {
+ public:
   Timer() {}
   Timer(const Timer& rhs);
   ~Timer();
@@ -56,8 +53,8 @@ public:
    */
   void start();
   /**
-   * \brief Stop the timer.  Once this call returns, no more callbacks will be called.  Does
-   * nothing if the timer is already stopped.
+   * \brief Stop the timer.  Once this call returns, no more callbacks will be
+   * called.  Does nothing if the timer is already stopped.
    */
   void stop();
 
@@ -68,36 +65,27 @@ public:
 
   /**
    * \brief Set the period of this timer
-   * \param reset Whether to reset the timer. If true, timer ignores elapsed time and next cb occurs at now()+period
+   * \param reset Whether to reset the timer. If true, timer ignores elapsed
+   * time and next cb occurs at now()+period
    */
-  void setPeriod(const Duration& period, bool reset=true);
+  void setPeriod(const Duration& period, bool reset = true);
 
   bool hasStarted() const { return impl_ && impl_->hasStarted(); }
   bool isValid() { return impl_ && impl_->isValid(); }
   bool isValid() const { return impl_ && impl_->isValid(); }
   operator void*() { return isValid() ? (void*)1 : (void*)0; }
 
-  bool operator<(const Timer& rhs)
-  {
-    return impl_ < rhs.impl_;
-  }
+  bool operator<(const Timer& rhs) { return impl_ < rhs.impl_; }
 
-  bool operator==(const Timer& rhs)
-  {
-    return impl_ == rhs.impl_;
-  }
+  bool operator==(const Timer& rhs) { return impl_ == rhs.impl_; }
 
-  bool operator!=(const Timer& rhs)
-  {
-    return impl_ != rhs.impl_;
-  }
+  bool operator!=(const Timer& rhs) { return impl_ != rhs.impl_; }
 
-private:
+ private:
   Timer(const TimerOptions& ops);
 
-  class Impl
-  {
-  public:
+  class Impl {
+   public:
     Impl();
     ~Impl();
 
@@ -105,7 +93,7 @@ private:
     bool isValid();
     bool isValid() const;
     bool hasPending();
-    void setPeriod(const Duration& period, bool reset=true);
+    void setPeriod(const Duration& period, bool reset = true);
 
     void start();
     void stop();
@@ -128,6 +116,6 @@ private:
   friend class NodeHandle;
 };
 
-}
+}  // namespace ros
 
 #endif

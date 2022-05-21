@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -31,47 +31,44 @@
 #include "common.h"
 #include "ros/forwards.h"
 
-namespace ros
-{
+namespace ros {
 
 /**
  * \brief Encapsulates all options available for starting a timer
  */
-struct ROSCPP_DECL WallTimerOptions
-{
+struct ROSCPP_DECL WallTimerOptions {
   WallTimerOptions()
-  : period(0.1)
-  , callback_queue(0)
-  , oneshot(false)
-  , autostart(true)
-  {
-  }
+      : period(0.1), callback_queue(0), oneshot(false), autostart(true) {}
 
   /*
    * \brief Constructor
    * \param
    */
-  WallTimerOptions(WallDuration _period, const WallTimerCallback& _callback, CallbackQueueInterface* _queue, 
-                   bool oneshot = false, bool autostart = true)
-  : period(_period)
-  , callback(_callback)
-  , callback_queue(_queue)
-  , oneshot(oneshot)
-  , autostart(autostart)
-  {}
+  WallTimerOptions(WallDuration _period, const WallTimerCallback& _callback,
+                   CallbackQueueInterface* _queue, bool oneshot = false,
+                   bool autostart = true)
+      : period(_period),
+        callback(_callback),
+        callback_queue(_queue),
+        oneshot(oneshot),
+        autostart(autostart) {}
 
-  WallDuration period;                                              ///< The period to call the callback at
-  WallTimerCallback callback;                                       ///< The callback to call
+  WallDuration period;         ///< The period to call the callback at
+  WallTimerCallback callback;  ///< The callback to call
 
-  CallbackQueueInterface* callback_queue;                           ///< Queue to add callbacks to.  If NULL, the global callback queue will be used
+  CallbackQueueInterface*
+      callback_queue;  ///< Queue to add callbacks to.  If NULL, the global
+                       ///< callback queue will be used
 
   /**
-   * A shared pointer to an object to track for these callbacks.  If set, the a weak_ptr will be created to this object,
-   * and if the reference count goes to 0 the subscriber callbacks will not get called.
+   * A shared pointer to an object to track for these callbacks.  If set, the a
+   * weak_ptr will be created to this object, and if the reference count goes to
+   * 0 the subscriber callbacks will not get called.
    *
-   * \note Note that setting this will cause a new reference to be added to the object before the
-   * callback, and for it to go out of scope (and potentially be deleted) in the code path (and therefore
-   * thread) that the callback is invoked from.
+   * \note Note that setting this will cause a new reference to be added to the
+   * object before the callback, and for it to go out of scope (and potentially
+   * be deleted) in the code path (and therefore thread) that the callback is
+   * invoked from.
    */
   VoidConstPtr tracked_object;
 
@@ -79,8 +76,6 @@ struct ROSCPP_DECL WallTimerOptions
   bool autostart;
 };
 
-
-}
+}  // namespace ros
 
 #endif
-

@@ -28,38 +28,38 @@
 #ifndef ROSCPP_XMLRPC_MANAGER_H
 #define ROSCPP_XMLRPC_MANAGER_H
 
-#include <string>
-#include <set>
+#include <ros/time.h>
+
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <set>
+#include <string>
 
 #include "common.h"
 #include "xmlrpcpp/XmlRpc.h"
 
-#include <ros/time.h>
-
-
-namespace ros
-{
+namespace ros {
 
 /**
  * \brief internal
  */
-namespace xmlrpc
-{
-ROSCPP_DECL XmlRpc::XmlRpcValue responseStr(int code, const std::string& msg, const std::string& response);
-ROSCPP_DECL XmlRpc::XmlRpcValue responseInt(int code, const std::string& msg, int response);
-ROSCPP_DECL XmlRpc::XmlRpcValue responseBool(int code, const std::string& msg, bool response);
-}
+namespace xmlrpc {
+ROSCPP_DECL XmlRpc::XmlRpcValue responseStr(int code, const std::string& msg,
+                                            const std::string& response);
+ROSCPP_DECL XmlRpc::XmlRpcValue responseInt(int code, const std::string& msg,
+                                            int response);
+ROSCPP_DECL XmlRpc::XmlRpcValue responseBool(int code, const std::string& msg,
+                                             bool response);
+}  // namespace xmlrpc
 
 class XMLRPCCallWrapper;
 typedef boost::shared_ptr<XMLRPCCallWrapper> XMLRPCCallWrapperPtr;
 
-class ROSCPP_DECL ASyncXMLRPCConnection : public boost::enable_shared_from_this<ASyncXMLRPCConnection>
-{
-public:
+class ROSCPP_DECL ASyncXMLRPCConnection
+    : public boost::enable_shared_from_this<ASyncXMLRPCConnection> {
+ public:
   virtual ~ASyncXMLRPCConnection() {}
 
   virtual void addToDispatch(XmlRpc::XmlRpcDispatch* disp) = 0;
@@ -70,30 +70,26 @@ public:
 typedef boost::shared_ptr<ASyncXMLRPCConnection> ASyncXMLRPCConnectionPtr;
 typedef std::set<ASyncXMLRPCConnectionPtr> S_ASyncXMLRPCConnection;
 
-class ROSCPP_DECL CachedXmlRpcClient
-{
-public:
-  CachedXmlRpcClient(XmlRpc::XmlRpcClient *c)
-  : in_use_(false)
-  , client_(c)
-  {
-  }
+class ROSCPP_DECL CachedXmlRpcClient {
+ public:
+  CachedXmlRpcClient(XmlRpc::XmlRpcClient* c) : in_use_(false), client_(c) {}
 
   bool in_use_;
-  ros::SteadyTime last_use_time_; // for reaping
+  ros::SteadyTime last_use_time_;  // for reaping
   XmlRpc::XmlRpcClient* client_;
 
-  static const ros::WallDuration s_zombie_time_; // how long before it is toasted
+  static const ros::WallDuration
+      s_zombie_time_;  // how long before it is toasted
 };
 
 class XMLRPCManager;
 typedef boost::shared_ptr<XMLRPCManager> XMLRPCManagerPtr;
 
-typedef boost::function<void(XmlRpc::XmlRpcValue&, XmlRpc::XmlRpcValue&)> XMLRPCFunc;
+typedef boost::function<void(XmlRpc::XmlRpcValue&, XmlRpc::XmlRpcValue&)>
+    XMLRPCFunc;
 
-class ROSCPP_DECL XMLRPCManager
-{
-public:
+class ROSCPP_DECL XMLRPCManager {
+ public:
   static const XMLRPCManagerPtr& instance();
 
   XMLRPCManager();
@@ -109,8 +105,9 @@ public:
    *
    * @todo Consider making this private.
    */
-  bool validateXmlrpcResponse(const std::string& method, 
-			      XmlRpc::XmlRpcValue &response, XmlRpc::XmlRpcValue &payload);
+  bool validateXmlrpcResponse(const std::string& method,
+                              XmlRpc::XmlRpcValue& response,
+                              XmlRpc::XmlRpcValue& payload);
 
   /**
    * @brief Get the xmlrpc server URI of this node
@@ -118,7 +115,8 @@ public:
   inline const std::string& getServerURI() const { return uri_; }
   inline uint32_t getServerPort() const { return port_; }
 
-  XmlRpc::XmlRpcClient* getXMLRPCClient(const std::string& host, const int port, const std::string& uri);
+  XmlRpc::XmlRpcClient* getXMLRPCClient(const std::string& host, const int port,
+                                        const std::string& uri);
   void releaseXMLRPCClient(XmlRpc::XmlRpcClient* c);
 
   void addASyncConnection(const ASyncXMLRPCConnectionPtr& conn);
@@ -132,7 +130,7 @@ public:
 
   bool isShuttingDown() { return shutting_down_; }
 
-private:
+ private:
   void serverThreadFunc();
 
   std::string uri_;
@@ -159,9 +157,7 @@ private:
 
   S_ASyncXMLRPCConnection connections_;
 
-
-  struct FunctionInfo
-  {
+  struct FunctionInfo {
     std::string name;
     XMLRPCFunc function;
     XMLRPCCallWrapperPtr wrapper;
@@ -173,6 +169,6 @@ private:
   volatile bool unbind_requested_;
 };
 
-}
+}  // namespace ros
 
 #endif

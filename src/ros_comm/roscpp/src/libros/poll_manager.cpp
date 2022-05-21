@@ -26,42 +26,32 @@
  */
 
 #include "ros/poll_manager.h"
-#include "ros/common.h"
 
 #include <signal.h>
 
-namespace ros
-{
+#include "ros/common.h"
 
-const PollManagerPtr& PollManager::instance()
-{
+namespace ros {
+
+const PollManagerPtr& PollManager::instance() {
   static PollManagerPtr poll_manager = boost::make_shared<PollManager>();
   return poll_manager;
 }
 
-PollManager::PollManager()
-  : shutting_down_(false)
-{
-}
+PollManager::PollManager() : shutting_down_(false) {}
 
-PollManager::~PollManager()
-{
-  shutdown();
-}
+PollManager::~PollManager() { shutdown(); }
 
-void PollManager::start()
-{
+void PollManager::start() {
   shutting_down_ = false;
   thread_ = boost::thread(&PollManager::threadFunc, this);
 }
 
-void PollManager::shutdown()
-{
+void PollManager::shutdown() {
   if (shutting_down_) return;
 
   shutting_down_ = true;
-  if (thread_.get_id() != boost::this_thread::get_id())
-  {
+  if (thread_.get_id() != boost::this_thread::get_id()) {
     thread_.join();
   }
 
@@ -69,19 +59,16 @@ void PollManager::shutdown()
   poll_signal_.disconnect_all_slots();
 }
 
-void PollManager::threadFunc()
-{
+void PollManager::threadFunc() {
   disableAllSignalsInThisThread();
 
-  while (!shutting_down_)
-  {
+  while (!shutting_down_) {
     {
       boost::recursive_mutex::scoped_lock lock(signal_mutex_);
       poll_signal_();
     }
 
-    if (shutting_down_)
-    {
+    if (shutting_down_) {
       return;
     }
 
@@ -89,16 +76,15 @@ void PollManager::threadFunc()
   }
 }
 
-boost::signals2::connection PollManager::addPollThreadListener(const VoidFunc& func)
-{
+boost::signals2::connection PollManager::addPollThreadListener(
+    const VoidFunc& func) {
   boost::recursive_mutex::scoped_lock lock(signal_mutex_);
   return poll_signal_.connect(func);
 }
 
-void PollManager::removePollThreadListener(boost::signals2::connection c)
-{
+void PollManager::removePollThreadListener(boost::signals2::connection c) {
   boost::recursive_mutex::scoped_lock lock(signal_mutex_);
   c.disconnect();
 }
 
-}
+}  // namespace ros

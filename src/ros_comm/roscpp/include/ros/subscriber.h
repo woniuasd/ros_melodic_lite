@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,20 +32,19 @@
 #include "ros/forwards.h"
 #include "ros/subscription_callback_helper.h"
 
-namespace ros
-{
+namespace ros {
 
 /**
  * \brief Manages an subscription callback on a specific topic.
  *
- * A Subscriber should always be created through a call to NodeHandle::subscribe(), or copied from one
- * that was. Once all copies of a specific
- * Subscriber go out of scope, the subscription callback associated with that handle will stop
- * being called.  Once all Subscriber for a given topic go out of scope the topic will be unsubscribed.
+ * A Subscriber should always be created through a call to
+ * NodeHandle::subscribe(), or copied from one that was. Once all copies of a
+ * specific Subscriber go out of scope, the subscription callback associated
+ * with that handle will stop being called.  Once all Subscriber for a given
+ * topic go out of scope the topic will be unsubscribed.
  */
-class ROSCPP_DECL Subscriber
-{
-public:
+class ROSCPP_DECL Subscriber {
+ public:
   Subscriber() {}
   Subscriber(const Subscriber& rhs);
   ~Subscriber();
@@ -54,11 +53,11 @@ public:
   /**
    * \brief Unsubscribe the callback associated with this Subscriber
    *
-   * This method usually does not need to be explicitly called, as automatic shutdown happens when
-   * all copies of this Subscriber go out of scope
+   * This method usually does not need to be explicitly called, as automatic
+   * shutdown happens when all copies of this Subscriber go out of scope
    *
-   * This method overrides the automatic reference counted unsubscribe, and immediately
-   * unsubscribes the callback associated with this Subscriber
+   * This method overrides the automatic reference counted unsubscribe, and
+   * immediately unsubscribes the callback associated with this Subscriber
    */
   void shutdown();
 
@@ -69,31 +68,22 @@ public:
    */
   uint32_t getNumPublishers() const;
 
-  operator void*() const { return (impl_ && impl_->isValid()) ? (void*)1 : (void*)0; }
-
-  bool operator<(const Subscriber& rhs) const
-  {
-    return impl_ < rhs.impl_;
+  operator void*() const {
+    return (impl_ && impl_->isValid()) ? (void*)1 : (void*)0;
   }
 
-  bool operator==(const Subscriber& rhs) const
-  {
-    return impl_ == rhs.impl_;
-  }
+  bool operator<(const Subscriber& rhs) const { return impl_ < rhs.impl_; }
 
-  bool operator!=(const Subscriber& rhs) const
-  {
-    return impl_ != rhs.impl_;
-  }
+  bool operator==(const Subscriber& rhs) const { return impl_ == rhs.impl_; }
 
-private:
+  bool operator!=(const Subscriber& rhs) const { return impl_ != rhs.impl_; }
 
-  Subscriber(const std::string& topic, const NodeHandle& node_handle, 
-	     const SubscriptionCallbackHelperPtr& helper);
+ private:
+  Subscriber(const std::string& topic, const NodeHandle& node_handle,
+             const SubscriptionCallbackHelperPtr& helper);
 
-  class Impl
-  {
-  public:
+  class Impl {
+   public:
     Impl();
     ~Impl();
 
@@ -115,8 +105,6 @@ private:
 };
 typedef std::vector<Subscriber> V_Subscriber;
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_PUBLISHER_HANDLE_H
-
-
+#endif  // ROSCPP_PUBLISHER_HANDLE_H

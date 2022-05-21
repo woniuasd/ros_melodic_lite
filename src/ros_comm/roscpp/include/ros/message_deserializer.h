@@ -28,29 +28,32 @@
 #ifndef ROSCPP_MESSAGE_DESERIALIZER_H
 #define ROSCPP_MESSAGE_DESERIALIZER_H
 
-#include "forwards.h"
-#include "common.h"
-
 #include <ros/serialized_message.h>
 
-#include <boost/thread/mutex.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/thread/mutex.hpp>
 
-namespace ros
-{
+#include "common.h"
+#include "forwards.h"
+
+namespace ros {
 
 class SubscriptionCallbackHelper;
-typedef boost::shared_ptr<SubscriptionCallbackHelper> SubscriptionCallbackHelperPtr;
+typedef boost::shared_ptr<SubscriptionCallbackHelper>
+    SubscriptionCallbackHelperPtr;
 
-class ROSCPP_DECL MessageDeserializer
-{
-public:
-  MessageDeserializer(const SubscriptionCallbackHelperPtr& helper, const SerializedMessage& m, const boost::shared_ptr<M_string>& connection_header);
+class ROSCPP_DECL MessageDeserializer {
+ public:
+  MessageDeserializer(const SubscriptionCallbackHelperPtr& helper,
+                      const SerializedMessage& m,
+                      const boost::shared_ptr<M_string>& connection_header);
 
   VoidConstPtr deserialize();
-  const boost::shared_ptr<M_string>& getConnectionHeader() { return connection_header_; }
+  const boost::shared_ptr<M_string>& getConnectionHeader() {
+    return connection_header_;
+  }
 
-private:
+ private:
   SubscriptionCallbackHelperPtr helper_;
   SerializedMessage serialized_message_;
   boost::shared_ptr<M_string> connection_header_;
@@ -60,7 +63,6 @@ private:
 };
 typedef boost::shared_ptr<MessageDeserializer> MessageDeserializerPtr;
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_MESSAGE_DESERIALIZER_H
-
+#endif  // ROSCPP_MESSAGE_DESERIALIZER_H

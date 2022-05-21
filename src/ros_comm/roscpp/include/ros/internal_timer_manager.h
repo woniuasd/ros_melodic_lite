@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,20 +28,22 @@
 #ifndef ROSCPP_INTERNAL_TIMER_MANAGER_H
 #define ROSCPP_INTERNAL_TIMER_MANAGER_H
 
-#include "forwards.h"
 #include <ros/time.h>
+
 #include "common.h"
+#include "forwards.h"
 
-namespace ros
-{
+namespace ros {
 
-template<typename T, typename D, typename E> class TimerManager;
-typedef TimerManager<SteadyTime, WallDuration, SteadyTimerEvent> InternalTimerManager;
+template <typename T, typename D, typename E>
+class TimerManager;
+typedef TimerManager<SteadyTime, WallDuration, SteadyTimerEvent>
+    InternalTimerManager;
 typedef boost::shared_ptr<InternalTimerManager> InternalTimerManagerPtr;
 
 ROSCPP_DECL void initInternalTimerManager();
 ROSCPP_DECL InternalTimerManagerPtr getInternalTimerManager();
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_INTERNAL_TIMER_MANAGER_H
+#endif  // ROSCPP_INTERNAL_TIMER_MANAGER_H

@@ -9,9 +9,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,55 +27,50 @@
  */
 
 #include "ros/intraprocess_subscriber_link.h"
-#include "ros/intraprocess_publisher_link.h"
-#include "ros/publication.h"
-#include "ros/header.h"
-#include "ros/connection.h"
-#include "ros/transport/transport.h"
-#include "ros/this_node.h"
-#include "ros/connection_manager.h"
-#include "ros/topic_manager.h"
-#include "ros/file_log.h"
 
 #include <boost/bind.hpp>
 
-namespace ros
-{
+#include "ros/connection.h"
+#include "ros/connection_manager.h"
+#include "ros/file_log.h"
+#include "ros/header.h"
+#include "ros/intraprocess_publisher_link.h"
+#include "ros/publication.h"
+#include "ros/this_node.h"
+#include "ros/topic_manager.h"
+#include "ros/transport/transport.h"
 
-IntraProcessSubscriberLink::IntraProcessSubscriberLink(const PublicationPtr& parent)
-: dropped_(false)
-{
+namespace ros {
+
+IntraProcessSubscriberLink::IntraProcessSubscriberLink(
+    const PublicationPtr& parent)
+    : dropped_(false) {
   ROS_ASSERT(parent);
   parent_ = parent;
   topic_ = parent->getName();
 }
 
-IntraProcessSubscriberLink::~IntraProcessSubscriberLink()
-{
-}
+IntraProcessSubscriberLink::~IntraProcessSubscriberLink() {}
 
-void IntraProcessSubscriberLink::setSubscriber(const IntraProcessPublisherLinkPtr& subscriber)
-{
+void IntraProcessSubscriberLink::setSubscriber(
+    const IntraProcessPublisherLinkPtr& subscriber) {
   subscriber_ = subscriber;
   connection_id_ = ConnectionManager::instance()->getNewConnectionID();
   destination_caller_id_ = this_node::getName();
 }
 
-bool IntraProcessSubscriberLink::isLatching()
-{
-  if (PublicationPtr parent = parent_.lock())
-  {
+bool IntraProcessSubscriberLink::isLatching() {
+  if (PublicationPtr parent = parent_.lock()) {
     return parent->isLatching();
   }
 
   return false;
 }
 
-void IntraProcessSubscriberLink::enqueueMessage(const SerializedMessage& m, bool ser, bool nocopy)
-{
+void IntraProcessSubscriberLink::enqueueMessage(const SerializedMessage& m,
+                                                bool ser, bool nocopy) {
   boost::recursive_mutex::scoped_lock lock(drop_mutex_);
-  if (dropped_)
-  {
+  if (dropped_) {
     return;
   }
 
@@ -83,52 +78,46 @@ void IntraProcessSubscriberLink::enqueueMessage(const SerializedMessage& m, bool
   subscriber_->handleMessage(m, ser, nocopy);
 }
 
-std::string IntraProcessSubscriberLink::getTransportType()
-{
+std::string IntraProcessSubscriberLink::getTransportType() {
   return std::string("INTRAPROCESS");
 }
 
-std::string IntraProcessSubscriberLink::getTransportInfo()
-{
+std::string IntraProcessSubscriberLink::getTransportInfo() {
   // TODO: Check if we can dump more useful information here
   return getTransportType();
 }
 
-void IntraProcessSubscriberLink::drop()
-{
+void IntraProcessSubscriberLink::drop() {
   {
     boost::recursive_mutex::scoped_lock lock(drop_mutex_);
-    if (dropped_)
-    {
+    if (dropped_) {
       return;
     }
 
     dropped_ = true;
   }
 
-  if (subscriber_)
-  {
+  if (subscriber_) {
     subscriber_->drop();
     subscriber_.reset();
   }
 
-  if (PublicationPtr parent = parent_.lock())
-  {
-    ROSCPP_LOG_DEBUG("Connection to local subscriber on topic [%s] dropped", topic_.c_str());
+  if (PublicationPtr parent = parent_.lock()) {
+    ROSCPP_LOG_DEBUG("Connection to local subscriber on topic [%s] dropped",
+                     topic_.c_str());
 
     parent->removeSubscriberLink(shared_from_this());
   }
 }
 
-void IntraProcessSubscriberLink::getPublishTypes(bool& ser, bool& nocopy, const std::type_info& ti)
-{
+void IntraProcessSubscriberLink::getPublishTypes(bool& ser, bool& nocopy,
+                                                 const std::type_info& ti) {
   boost::recursive_mutex::scoped_lock lock(drop_mutex_);
-  if (dropped_)
-  {
+  if (dropped_) {
     return;
   }
 
   subscriber_->getPublishTypes(ser, nocopy, ti);
 }
 
-} // namespace ros
+}  // namespace ros

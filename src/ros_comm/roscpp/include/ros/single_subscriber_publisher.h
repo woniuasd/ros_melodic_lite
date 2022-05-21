@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,58 +28,54 @@
 #ifndef ROSCPP_SINGLE_SUBSCRIBER_PUBLISHER_H
 #define ROSCPP_SINGLE_SUBSCRIBER_PUBLISHER_H
 
-#include "ros/forwards.h"
-#include "ros/serialization.h"
-#include "common.h"
-
 #include <boost/utility.hpp>
 
-namespace ros
-{
+#include "common.h"
+#include "ros/forwards.h"
+#include "ros/serialization.h"
+
+namespace ros {
 
 /**
- * \brief Allows publication of a message to a single subscriber. Only available inside subscriber connection callbacks
+ * \brief Allows publication of a message to a single subscriber. Only available
+ * inside subscriber connection callbacks
  */
-class ROSCPP_DECL SingleSubscriberPublisher : public boost::noncopyable
-{
-public:
+class ROSCPP_DECL SingleSubscriberPublisher : public boost::noncopyable {
+ public:
   SingleSubscriberPublisher(const SubscriberLinkPtr& link);
   ~SingleSubscriberPublisher();
 
   /**
    * \brief Publish a message on the topic associated with this Publisher.
    *
-   * This version of publish will allow fast intra-process message-passing in the future,
-   * so you may not mutate the message after it has been passed in here (since it will be
-   * passed directly into a callback function)
+   * This version of publish will allow fast intra-process message-passing in
+   * the future, so you may not mutate the message after it has been passed in
+   * here (since it will be passed directly into a callback function)
    *
    */
-  template<class M>
-  void publish(const boost::shared_ptr<M const>& message) const
-  {
+  template <class M>
+  void publish(const boost::shared_ptr<M const>& message) const {
     publish(*message);
   }
 
   /**
    * \brief Publish a message on the topic associated with this Publisher.
    *
-   * This version of publish will allow fast intra-process message-passing in the future,
-   * so you may not mutate the message after it has been passed in here (since it will be
-   * passed directly into a callback function)
+   * This version of publish will allow fast intra-process message-passing in
+   * the future, so you may not mutate the message after it has been passed in
+   * here (since it will be passed directly into a callback function)
    *
    */
-  template<class M>
-  void publish(const boost::shared_ptr<M>& message) const
-  {
+  template <class M>
+  void publish(const boost::shared_ptr<M>& message) const {
     publish(*message);
   }
 
   /**
    * \brief Publish a message on the topic associated with this Publisher.
    */
-  template<class M>
-  void publish(const M& message) const
-  {
+  template <class M>
+  void publish(const M& message) const {
     using namespace serialization;
     SerializedMessage m = serializeMessage(message);
     publish(m);
@@ -95,13 +91,12 @@ public:
    */
   std::string getSubscriberName() const;
 
-private:
+ private:
   void publish(const SerializedMessage& m) const;
 
   SubscriberLinkPtr link_;
 };
 
-}
+}  // namespace ros
 
-#endif // ROSCPP_PUBLISHER_HANDLE_H
-
+#endif  // ROSCPP_PUBLISHER_HANDLE_H

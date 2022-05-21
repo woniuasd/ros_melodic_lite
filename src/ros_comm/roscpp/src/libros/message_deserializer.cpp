@@ -25,57 +25,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "ros/message_deserializer.h"
-#include "ros/subscription_callback_helper.h"
+
 #include <ros/console.h>
 
-namespace ros
-{
+#include "ros/subscription_callback_helper.h"
 
-MessageDeserializer::MessageDeserializer(const SubscriptionCallbackHelperPtr& helper, const SerializedMessage& m, const boost::shared_ptr<M_string>& connection_header)
-: helper_(helper)
-, serialized_message_(m)
-, connection_header_(connection_header)
-{
-  if (serialized_message_.message && *serialized_message_.type_info != helper->getTypeInfo())
-  {
+namespace ros {
+
+MessageDeserializer::MessageDeserializer(
+    const SubscriptionCallbackHelperPtr& helper, const SerializedMessage& m,
+    const boost::shared_ptr<M_string>& connection_header)
+    : helper_(helper),
+      serialized_message_(m),
+      connection_header_(connection_header) {
+  if (serialized_message_.message &&
+      *serialized_message_.type_info != helper->getTypeInfo()) {
     serialized_message_.message.reset();
   }
 }
 
-VoidConstPtr MessageDeserializer::deserialize()
-{
+VoidConstPtr MessageDeserializer::deserialize() {
   boost::mutex::scoped_lock lock(mutex_);
 
-  if (msg_)
-  {
+  if (msg_) {
     return msg_;
   }
 
-  if (serialized_message_.message)
-  {
+  if (serialized_message_.message) {
     msg_ = serialized_message_.message;
     return msg_;
   }
 
-  if (!serialized_message_.buf && serialized_message_.num_bytes > 0)
-  {
+  if (!serialized_message_.buf && serialized_message_.num_bytes > 0) {
     // If the buffer has been reset it means we tried to deserialize and failed
     return VoidConstPtr();
   }
 
-  try
-  {
+  try {
     SubscriptionCallbackHelperDeserializeParams params;
     params.buffer = serialized_message_.message_start;
-    params.length = serialized_message_.num_bytes - (serialized_message_.message_start - serialized_message_.buf.get());
+    params.length =
+        serialized_message_.num_bytes -
+        (serialized_message_.message_start - serialized_message_.buf.get());
     params.connection_header = connection_header_;
     msg_ = helper_->deserialize(params);
-  }
-  catch (std::exception& e)
-  {
-    ROS_ERROR("Exception thrown when deserializing message of length [%d] from [%s]: %s", (uint32_t)serialized_message_.num_bytes, (*connection_header_)["callerid"].c_str(), e.what());
+  } catch (std::exception& e) {
+    ROS_ERROR(
+        "Exception thrown when deserializing message of length [%d] from [%s]: "
+        "%s",
+        (uint32_t)serialized_message_.num_bytes,
+        (*connection_header_)["callerid"].c_str(), e.what());
   }
 
   serialized_message_.buf.reset();
@@ -83,4 +83,4 @@ VoidConstPtr MessageDeserializer::deserialize()
   return msg_;
 }
 
-}
+}  // namespace ros

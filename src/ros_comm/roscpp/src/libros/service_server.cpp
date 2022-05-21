@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -26,67 +26,52 @@
  */
 
 #include "ros/service_server.h"
+
 #include "ros/node_handle.h"
 #include "ros/service_manager.h"
 
-namespace ros
-{
+namespace ros {
 
-ServiceServer::Impl::Impl() : unadvertised_(false) { }
+ServiceServer::Impl::Impl() : unadvertised_(false) {}
 
-ServiceServer::Impl::~Impl()
-{
+ServiceServer::Impl::~Impl() {
   ROS_DEBUG("ServiceServer on '%s' deregistering callbacks.", service_.c_str());
   unadvertise();
 }
 
-bool ServiceServer::Impl::isValid() const
-{
-  return !unadvertised_;
-}
+bool ServiceServer::Impl::isValid() const { return !unadvertised_; }
 
-void ServiceServer::Impl::unadvertise()
-{
-  if (!unadvertised_)
-  {
+void ServiceServer::Impl::unadvertise() {
+  if (!unadvertised_) {
     unadvertised_ = true;
     ServiceManager::instance()->unadvertiseService(service_);
     node_handle_.reset();
   }
 }
 
-ServiceServer::ServiceServer(const std::string& service, const NodeHandle& node_handle)
-: impl_(boost::make_shared<Impl>())
-{
+ServiceServer::ServiceServer(const std::string& service,
+                             const NodeHandle& node_handle)
+    : impl_(boost::make_shared<Impl>()) {
   impl_->service_ = service;
   impl_->node_handle_ = boost::make_shared<NodeHandle>(node_handle);
 }
 
-ServiceServer::ServiceServer(const ServiceServer& rhs)
-{
-  impl_ = rhs.impl_;
-}
+ServiceServer::ServiceServer(const ServiceServer& rhs) { impl_ = rhs.impl_; }
 
-ServiceServer::~ServiceServer()
-{
-}
+ServiceServer::~ServiceServer() {}
 
-void ServiceServer::shutdown()
-{
-  if (impl_)
-  {
+void ServiceServer::shutdown() {
+  if (impl_) {
     impl_->unadvertise();
   }
 }
 
-std::string ServiceServer::getService() const
-{
-  if (impl_ && impl_->isValid())
-  {
+std::string ServiceServer::getService() const {
+  if (impl_ && impl_->isValid()) {
     return impl_->service_;
   }
 
   return std::string();
 }
 
-} // namespace ros
+}  // namespace ros

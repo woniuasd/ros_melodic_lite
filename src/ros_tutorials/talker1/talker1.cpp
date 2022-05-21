@@ -50,7 +50,7 @@ int main(int argc, char **argv)
    * part of the ROS system.
    */
 // %Tag(INIT)%
-  ros::init(argc, argv, "talker");
+  ros::init(argc, argv, "talker1");
 // %EndTag(INIT)%
 
   /**
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
    * buffer up before throwing some away.
    */
 // %Tag(PUBLISHER)%
-  ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
+  ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter1", 10);
 // %EndTag(PUBLISHER)%
 
 // %Tag(LOOP_RATE)%
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
     std_msgs::String msg;
 
     std::stringstream ss;
-    ss << "hello world " << count;
+    ss << "hello world1 " << count;
     msg.data = ss.str();
 // %EndTag(FILL_MESSAGE)%
 

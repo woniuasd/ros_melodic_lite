@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -31,14 +31,13 @@
 #include "common.h"
 #include "forwards.h"
 
-namespace ros
-{
+namespace ros {
 
 /**
- * \brief Contains functions which provide information about this process' ROS node
+ * \brief Contains functions which provide information about this process' ROS
+ * node
  */
-namespace this_node
-{
+namespace this_node {
 
 /**
  * \brief Returns the name of the current node.
@@ -61,10 +60,8 @@ ROSCPP_DECL void getAdvertisedTopics(V_string& topics);
  */
 ROSCPP_DECL void getSubscribedTopics(V_string& topics);
 
-} // namespace this_node
+}  // namespace this_node
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_THIS_NODE_H
-
-
+#endif  // ROSCPP_THIS_NODE_H

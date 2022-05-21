@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -25,63 +25,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdio>
 #include "ros/file_log.h"
-#include "ros/this_node.h"
 
-#include <ros/io.h>
 #include <ros/console.h>
+#include <ros/io.h>
 
 #include <boost/filesystem.hpp>
+#include <cstdio>
+
+#include "ros/this_node.h"
 
 namespace fs = boost::filesystem;
 
-namespace ros
-{
+namespace ros {
 
-namespace file_log
-{
+namespace file_log {
 
 std::string g_log_directory;
 
-const std::string& getLogDirectory()
-{
-  return g_log_directory;
-}
+const std::string& getLogDirectory() { return g_log_directory; }
 
-void init(const M_string& remappings)
-{
+void init(const M_string& remappings) {
   std::string log_file_name;
   M_string::const_iterator it = remappings.find("__log");
-  if (it != remappings.end())
-  {
+  if (it != remappings.end()) {
     log_file_name = it->second;
   }
 
   {
     // Log filename can be specified on the command line through __log
     // If it's been set, don't create our own name
-    if (log_file_name.empty())
-    {
+    if (log_file_name.empty()) {
       // Setup the logfile appender
       // Can't do this in rosconsole because the node name is not known
       pid_t pid = getpid();
       std::string ros_log_env;
-      if ( get_environment_variable(ros_log_env, "ROS_LOG_DIR"))
-      {
+      if (get_environment_variable(ros_log_env, "ROS_LOG_DIR")) {
         log_file_name = ros_log_env + std::string("/");
-      }
-      else
-      {
-        if ( get_environment_variable(ros_log_env, "ROS_HOME"))
-        {
+      } else {
+        if (get_environment_variable(ros_log_env, "ROS_HOME")) {
           log_file_name = ros_log_env + std::string("/log/");
-        }
-        else
-        {
+        } else {
           // Not cross-platform?
-          if( get_environment_variable(ros_log_env, "HOME") )
-          {
+          if (get_environment_variable(ros_log_env, "HOME")) {
             std::string dotros = ros_log_env + std::string("/.ros/");
             fs::create_directory(dotros);
             log_file_name = dotros + "log/";
@@ -91,21 +77,18 @@ void init(const M_string& remappings)
       }
 
       // sanitize the node name and tack it to the filename
-      for (size_t i = 1; i < this_node::getName().length(); i++)
-      {
-        if (!isalnum(this_node::getName()[i]))
-        {
+      for (size_t i = 1; i < this_node::getName().length(); i++) {
+        if (!isalnum(this_node::getName()[i])) {
           log_file_name += '_';
-        }
-        else
-        {
+        } else {
           log_file_name += this_node::getName()[i];
         }
       }
 
       char pid_str[100];
       std::snprintf(pid_str, sizeof(pid_str), "%d", pid);
-      log_file_name += std::string("_") + std::string(pid_str) + std::string(".log");
+      log_file_name +=
+          std::string("_") + std::string(pid_str) + std::string(".log");
     }
 
     log_file_name = fs::system_complete(log_file_name).string();
@@ -113,6 +96,6 @@ void init(const M_string& remappings)
   }
 }
 
-} // namespace file_log
+}  // namespace file_log
 
-} // namespace ros
+}  // namespace ros

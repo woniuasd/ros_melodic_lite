@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,17 +28,15 @@
 #ifndef ROSCPP_SERVICE_CLIENT_LINK_H
 #define ROSCPP_SERVICE_CLIENT_LINK_H
 
-#include "ros/common.h"
-
-#include <boost/thread/mutex.hpp>
-#include <boost/shared_array.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/signals2/connection.hpp>
-
+#include <boost/thread/mutex.hpp>
 #include <queue>
 
-namespace ros
-{
+#include "ros/common.h"
+
+namespace ros {
 class Header;
 class ServicePublication;
 typedef boost::weak_ptr<ServicePublication> ServicePublicationWPtr;
@@ -49,9 +47,9 @@ typedef boost::shared_ptr<Connection> ConnectionPtr;
 /**
  * \brief Handles a connection to a single incoming service client.
  */
-class ROSCPP_DECL ServiceClientLink : public boost::enable_shared_from_this<ServiceClientLink>
-{
-public:
+class ROSCPP_DECL ServiceClientLink
+    : public boost::enable_shared_from_this<ServiceClientLink> {
+ public:
   ServiceClientLink();
   virtual ~ServiceClientLink();
 
@@ -68,12 +66,16 @@ public:
 
   const ConnectionPtr& getConnection() { return connection_; }
 
-private:
+ private:
   void onConnectionDropped(const ConnectionPtr& conn);
 
   void onHeaderWritten(const ConnectionPtr& conn);
-  void onRequestLength(const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success);
-  void onRequest(const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success);
+  void onRequestLength(const ConnectionPtr& conn,
+                       const boost::shared_array<uint8_t>& buffer,
+                       uint32_t size, bool success);
+  void onRequest(const ConnectionPtr& conn,
+                 const boost::shared_array<uint8_t>& buffer, uint32_t size,
+                 bool success);
   void onResponseWritten(const ConnectionPtr& conn);
 
   ConnectionPtr connection_;
@@ -83,9 +85,6 @@ private:
 };
 typedef boost::shared_ptr<ServiceClientLink> ServiceClientLinkPtr;
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_PUBLISHER_DATA_HANDLER_H
-
-
-
+#endif  // ROSCPP_PUBLISHER_DATA_HANDLER_H

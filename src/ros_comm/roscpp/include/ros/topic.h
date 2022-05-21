@@ -35,41 +35,32 @@
 #ifndef ROSCPP_TOPIC_H
 #define ROSCPP_TOPIC_H
 
-#include "common.h"
-#include "node_handle.h"
 #include <boost/shared_ptr.hpp>
 
-namespace ros
-{
-namespace topic
-{
+#include "common.h"
+#include "node_handle.h"
+
+namespace ros {
+namespace topic {
 
 /**
  * \brief Internal method, do not use
  */
-ROSCPP_DECL void waitForMessageImpl(SubscribeOptions& ops, const boost::function<bool(void)>& ready_pred, NodeHandle& nh, ros::Duration timeout);
+ROSCPP_DECL void waitForMessageImpl(
+    SubscribeOptions& ops, const boost::function<bool(void)>& ready_pred,
+    NodeHandle& nh, ros::Duration timeout);
 
-template<class M>
-class SubscribeHelper
-{
-public:
+template <class M>
+class SubscribeHelper {
+ public:
   typedef boost::shared_ptr<M const> MConstPtr;
-  void callback(const MConstPtr& message)
-  {
-    message_ = message;
-  }
+  void callback(const MConstPtr& message) { message_ = message; }
 
-  bool hasMessage()
-  {
-    return static_cast<bool>(message_);
-  }
+  bool hasMessage() { return static_cast<bool>(message_); }
 
-  MConstPtr getMessage()
-  {
-    return message_;
-  }
+  MConstPtr getMessage() { return message_; }
 
-private:
+ private:
   MConstPtr message_;
 };
 
@@ -79,17 +70,21 @@ private:
  * \param M <template> The message type
  * \param topic The topic to subscribe on
  * \param nh The NodeHandle to use to do the subscription
- * \param timeout The amount of time to wait before returning if no message is received
- * \return The message.  Empty boost::shared_ptr if waitForMessage is interrupted by the node shutting down
+ * \param timeout The amount of time to wait before returning if no message is
+ * received \return The message.  Empty boost::shared_ptr if waitForMessage is
+ * interrupted by the node shutting down
  */
-template<class M>
-boost::shared_ptr<M const> waitForMessage(const std::string& topic, NodeHandle& nh, ros::Duration timeout)
-{
+template <class M>
+boost::shared_ptr<M const> waitForMessage(const std::string& topic,
+                                          NodeHandle& nh,
+                                          ros::Duration timeout) {
   SubscribeHelper<M> helper;
   SubscribeOptions ops;
-  ops.template init<M>(topic, 1, boost::bind(&SubscribeHelper<M>::callback, &helper, _1));
+  ops.template init<M>(topic, 1,
+                       boost::bind(&SubscribeHelper<M>::callback, &helper, _1));
 
-  waitForMessageImpl(ops, boost::bind(&SubscribeHelper<M>::hasMessage, &helper), nh, timeout);
+  waitForMessageImpl(ops, boost::bind(&SubscribeHelper<M>::hasMessage, &helper),
+                     nh, timeout);
 
   return helper.getMessage();
 }
@@ -99,11 +94,11 @@ boost::shared_ptr<M const> waitForMessage(const std::string& topic, NodeHandle& 
  *
  * \param M <template> The message type
  * \param topic The topic to subscribe on
- * \return The message.  Empty boost::shared_ptr if waitForMessage is interrupted by the node shutting down
+ * \return The message.  Empty boost::shared_ptr if waitForMessage is
+ * interrupted by the node shutting down
  */
-template<class M>
-boost::shared_ptr<M const> waitForMessage(const std::string& topic)
-{
+template <class M>
+boost::shared_ptr<M const> waitForMessage(const std::string& topic) {
   ros::NodeHandle nh;
   return waitForMessage<M>(topic, nh, ros::Duration());
 }
@@ -113,12 +108,13 @@ boost::shared_ptr<M const> waitForMessage(const std::string& topic)
  *
  * \param M <template> The message type
  * \param topic The topic to subscribe on
- * \param timeout The amount of time to wait before returning if no message is received
- * \return The message.  Empty boost::shared_ptr if waitForMessage is interrupted by the node shutting down
+ * \param timeout The amount of time to wait before returning if no message is
+ * received \return The message.  Empty boost::shared_ptr if waitForMessage is
+ * interrupted by the node shutting down
  */
-template<class M>
-boost::shared_ptr<M const> waitForMessage(const std::string& topic, ros::Duration timeout)
-{
+template <class M>
+boost::shared_ptr<M const> waitForMessage(const std::string& topic,
+                                          ros::Duration timeout) {
   ros::NodeHandle nh;
   return waitForMessage<M>(topic, nh, timeout);
 }
@@ -129,15 +125,16 @@ boost::shared_ptr<M const> waitForMessage(const std::string& topic, ros::Duratio
  * \param M <template> The message type
  * \param topic The topic to subscribe on
  * \param nh The NodeHandle to use to do the subscription
- * \return The message.  Empty boost::shared_ptr if waitForMessage is interrupted by the node shutting down
+ * \return The message.  Empty boost::shared_ptr if waitForMessage is
+ * interrupted by the node shutting down
  */
-template<class M>
-boost::shared_ptr<M const> waitForMessage(const std::string& topic, ros::NodeHandle& nh)
-{
+template <class M>
+boost::shared_ptr<M const> waitForMessage(const std::string& topic,
+                                          ros::NodeHandle& nh) {
   return waitForMessage<M>(topic, nh, ros::Duration());
 }
 
-} // namespace topic
-} // namespace ros
+}  // namespace topic
+}  // namespace ros
 
-#endif // ROSCPP_TOPIC_H
+#endif  // ROSCPP_TOPIC_H

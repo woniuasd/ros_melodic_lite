@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,18 +28,17 @@
 #ifndef ROSCPP_MASTER_H
 #define ROSCPP_MASTER_H
 
+#include "common.h"
 #include "forwards.h"
 #include "xmlrpcpp/XmlRpcValue.h"
-#include "common.h"
 
-namespace ros
-{
+namespace ros {
 
 /**
- * \brief Contains functions which allow you to query information about the master
+ * \brief Contains functions which allow you to query information about the
+ * master
  */
-namespace master
-{
+namespace master {
 
 /** @brief Execute an XMLRPC call on the master
  *
@@ -47,11 +46,15 @@ namespace master
  * @param request The arguments to the RPC call
  * @param response [out] The resonse that was received.
  * @param payload [out] The payload that was received.
- * @param wait_for_master Whether or not this call should loop until it can contact the master
+ * @param wait_for_master Whether or not this call should loop until it can
+ * contact the master
  *
  * @return true if call succeeds, false otherwise.
  */
-ROSCPP_DECL bool execute(const std::string& method, const XmlRpc::XmlRpcValue& request, XmlRpc::XmlRpcValue& response, XmlRpc::XmlRpcValue& payload, bool wait_for_master);
+ROSCPP_DECL bool execute(const std::string& method,
+                         const XmlRpc::XmlRpcValue& request,
+                         XmlRpc::XmlRpcValue& response,
+                         XmlRpc::XmlRpcValue& payload, bool wait_for_master);
 
 /** @brief Get the hostname where the master runs.
  *
@@ -82,19 +85,19 @@ ROSCPP_DECL bool check();
 /**
  * \brief Contains information retrieved from the master about a topic
  */
-struct ROSCPP_DECL TopicInfo
-{
+struct ROSCPP_DECL TopicInfo {
   TopicInfo() {}
-  TopicInfo(const std::string& _name, const std::string& _datatype /*, const std::string& _md5sum*/)
-  : name(_name)
-  , datatype(_datatype)
+  TopicInfo(const std::string& _name,
+            const std::string& _datatype /*, const std::string& _md5sum*/)
+      : name(_name),
+        datatype(_datatype)
   //, md5sum(_md5sum)
   {}
-  std::string name;        ///< Name of the topic
-  std::string datatype;    ///< Datatype of the topic
+  std::string name;      ///< Name of the topic
+  std::string datatype;  ///< Datatype of the topic
 
   // not possible yet unfortunately (master does not have this information)
-  //std::string md5sum;      ///< md5sum of the topic
+  // std::string md5sum;      ///< md5sum of the topic
 };
 typedef std::vector<TopicInfo> V_TopicInfo;
 
@@ -118,13 +121,14 @@ ROSCPP_DECL bool getTopics(V_TopicInfo& topics);
 ROSCPP_DECL bool getNodes(V_string& nodes);
 
 /**
- * @brief Set the max time this node should spend looping trying to connect to the master
+ * @brief Set the max time this node should spend looping trying to connect to
+ * the master
  * @param The timeout.  A negative value means infinite
  */
 ROSCPP_DECL void setRetryTimeout(ros::WallDuration timeout);
 
-} // namespace master
+}  // namespace master
 
-} // namespace ros
+}  // namespace ros
 
 #endif

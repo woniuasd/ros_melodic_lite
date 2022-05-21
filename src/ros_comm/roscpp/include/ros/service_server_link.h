@@ -35,32 +35,29 @@
 #ifndef ROSCPP_SERVICE_SERVER_LINK_H
 #define ROSCPP_SERVICE_SERVER_LINK_H
 
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_array.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <queue>
+
 #include "ros/common.h"
 #include "ros/internal/condition_variable.h"
 
-#include <boost/thread/mutex.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/thread.hpp>
-
-#include <queue>
-
-namespace ros
-{
+namespace ros {
 class Header;
 class Message;
 class Connection;
 typedef boost::shared_ptr<Connection> ConnectionPtr;
 
 /**
- * \brief Handles a connection to a service.  If it's a non-persistent client, automatically disconnects
- * when its first service call has finished.
+ * \brief Handles a connection to a service.  If it's a non-persistent client,
+ * automatically disconnects when its first service call has finished.
  */
-class ROSCPP_DECL ServiceServerLink : public boost::enable_shared_from_this<ServiceServerLink>
-{
-private:
-  struct CallInfo
-  {
+class ROSCPP_DECL ServiceServerLink
+    : public boost::enable_shared_from_this<ServiceServerLink> {
+ private:
+  struct CallInfo {
     SerializedMessage req_;
     SerializedMessage* resp_;
 
@@ -77,16 +74,20 @@ private:
   typedef boost::shared_ptr<CallInfo> CallInfoPtr;
   typedef std::queue<CallInfoPtr> Q_CallInfo;
 
-public:
+ public:
   typedef std::map<std::string, std::string> M_string;
-  ServiceServerLink(const std::string& service_name, bool persistent, const std::string& request_md5sum, const std::string& response_md5sum, const M_string& header_values);
+  ServiceServerLink(const std::string& service_name, bool persistent,
+                    const std::string& request_md5sum,
+                    const std::string& response_md5sum,
+                    const M_string& header_values);
   virtual ~ServiceServerLink();
 
   //
   bool initialize(const ConnectionPtr& connection);
 
   /**
-   * \brief Returns whether this client is still valid, ie. its connection has not been dropped
+   * \brief Returns whether this client is still valid, ie. its connection has
+   * not been dropped
    */
   bool isValid() const;
   /**
@@ -103,23 +104,25 @@ public:
   /**
    * \brief Blocking call the service this client is connected to
    *
-   * If there is already a call happening in another thread, this will queue up the call and still block until
-   * it has finished.
+   * If there is already a call happening in another thread, this will queue up
+   * the call and still block until it has finished.
    */
   bool call(const SerializedMessage& req, SerializedMessage& resp);
 
-private:
+ private:
   void onConnectionDropped(const ConnectionPtr& conn);
   bool onHeaderReceived(const ConnectionPtr& conn, const Header& header);
 
   /**
-   * \brief Called when the currently queued call has finished.  Clears out the current call, notifying it that it
-   * has finished, then calls processNextCall()
+   * \brief Called when the currently queued call has finished.  Clears out the
+   * current call, notifying it that it has finished, then calls
+   * processNextCall()
    */
   void callFinished();
   /**
-   * \brief Pops the next call off the queue if one is available.  If this is a non-persistent connection and the queue is empty
-   * it will also drop the connection.
+   * \brief Pops the next call off the queue if one is available.  If this is a
+   * non-persistent connection and the queue is empty it will also drop the
+   * connection.
    */
   void processNextCall();
   /**
@@ -133,8 +136,12 @@ private:
 
   void onHeaderWritten(const ConnectionPtr& conn);
   void onRequestWritten(const ConnectionPtr& conn);
-  void onResponseOkAndLength(const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success);
-  void onResponse(const ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success);
+  void onResponseOkAndLength(const ConnectionPtr& conn,
+                             const boost::shared_array<uint8_t>& buffer,
+                             uint32_t size, bool success);
+  void onResponse(const ConnectionPtr& conn,
+                  const boost::shared_array<uint8_t>& buffer, uint32_t size,
+                  bool success);
 
   ConnectionPtr connection_;
   std::string service_name_;
@@ -155,9 +162,6 @@ private:
 };
 typedef boost::shared_ptr<ServiceServerLink> ServiceServerLinkPtr;
 
-} // namespace ros
+}  // namespace ros
 
-#endif // ROSCPP_SERVICE_SERVER_LINK_H
-
-
-
+#endif  // ROSCPP_SERVICE_SERVER_LINK_H

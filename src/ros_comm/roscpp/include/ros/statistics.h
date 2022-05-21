@@ -28,16 +28,17 @@
 #ifndef ROSCPP_STATISTICS_H
 #define ROSCPP_STATISTICS_H
 
-#include "forwards.h"
-#include "poll_set.h"
-#include "common.h"
-#include "publisher.h"
 #include <ros/time.h>
-#include "ros/subscription_callback_helper.h"
+
 #include <map>
 
-namespace ros
-{
+#include "common.h"
+#include "forwards.h"
+#include "poll_set.h"
+#include "publisher.h"
+#include "ros/subscription_callback_helper.h"
+
+namespace ros {
 
 /**
  * \brief This class logs statistics data about a ROS connection and
@@ -46,10 +47,8 @@ namespace ros
  * It provides a callback() function that has to be called everytime
  * a new message arrives on a topic.
  */
-class ROSCPP_DECL StatisticsLogger
-{
-public:
-
+class ROSCPP_DECL StatisticsLogger {
+ public:
   /**
    * Constructior
    */
@@ -63,10 +62,12 @@ public:
   /**
    * Callback function. Must be called for every message received.
    */
-  void callback(const boost::shared_ptr<M_string>& connection_header, const std::string& topic, const std::string& callerid, const SerializedMessage& m, const uint64_t& bytes_sent, const ros::Time& received_time, bool dropped);
+  void callback(const boost::shared_ptr<M_string>& connection_header,
+                const std::string& topic, const std::string& callerid,
+                const SerializedMessage& m, const uint64_t& bytes_sent,
+                const ros::Time& received_time, bool dropped);
 
-private:
-
+ private:
   // Range of window length, in seconds
   int max_window;
   int min_window;
@@ -107,6 +108,6 @@ private:
   std::map<std::string, struct StatData> map_;
 };
 
-}
+}  // namespace ros
 
 #endif

@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -26,76 +26,60 @@
  */
 
 #include "ros/wall_timer.h"
+
 #include "ros/timer_manager.h"
 
-namespace ros
-{
+namespace ros {
 
-WallTimer::Impl::Impl()
-  : started_(false)
-  , timer_handle_(-1)
-{ }
+WallTimer::Impl::Impl() : started_(false), timer_handle_(-1) {}
 
-WallTimer::Impl::~Impl()
-{
+WallTimer::Impl::~Impl() {
   ROS_DEBUG("WallTimer deregistering callbacks.");
   stop();
 }
 
-bool WallTimer::Impl::hasStarted() const
-{
-  return started_;
-}
+bool WallTimer::Impl::hasStarted() const { return started_; }
 
-void WallTimer::Impl::start()
-{
-  if (!started_)
-  {
+void WallTimer::Impl::start() {
+  if (!started_) {
     VoidConstPtr tracked_object;
-    if (has_tracked_object_)
-    {
+    if (has_tracked_object_) {
       tracked_object = tracked_object_.lock();
     }
-    timer_handle_ = TimerManager<WallTime, WallDuration, WallTimerEvent>::global().add(period_, callback_, callback_queue_, tracked_object, oneshot_);
+    timer_handle_ =
+        TimerManager<WallTime, WallDuration, WallTimerEvent>::global().add(
+            period_, callback_, callback_queue_, tracked_object, oneshot_);
     started_ = true;
   }
 }
 
-void WallTimer::Impl::stop()
-{
-  if (started_)
-  {
+void WallTimer::Impl::stop() {
+  if (started_) {
     started_ = false;
-    TimerManager<WallTime, WallDuration, WallTimerEvent>::global().remove(timer_handle_);
+    TimerManager<WallTime, WallDuration, WallTimerEvent>::global().remove(
+        timer_handle_);
     timer_handle_ = -1;
   }
 }
 
-bool WallTimer::Impl::isValid()
-{
-  return !period_.isZero();
-}
+bool WallTimer::Impl::isValid() { return !period_.isZero(); }
 
-bool WallTimer::Impl::hasPending()
-{
-  if (!isValid() || timer_handle_ == -1)
-  {
+bool WallTimer::Impl::hasPending() {
+  if (!isValid() || timer_handle_ == -1) {
     return false;
   }
 
-  return TimerManager<WallTime, WallDuration, WallTimerEvent>::global().hasPending(timer_handle_);
+  return TimerManager<WallTime, WallDuration, WallTimerEvent>::global()
+      .hasPending(timer_handle_);
 }
 
-void WallTimer::Impl::setPeriod(const WallDuration& period, bool reset)
-{
+void WallTimer::Impl::setPeriod(const WallDuration& period, bool reset) {
   period_ = period;
-  TimerManager<WallTime, WallDuration, WallTimerEvent>::global().setPeriod(timer_handle_, period, reset);
+  TimerManager<WallTime, WallDuration, WallTimerEvent>::global().setPeriod(
+      timer_handle_, period, reset);
 }
 
-
-WallTimer::WallTimer(const WallTimerOptions& ops)
-: impl_(new Impl)
-{
+WallTimer::WallTimer(const WallTimerOptions& ops) : impl_(new Impl) {
   impl_->period_ = ops.period;
   impl_->callback_ = ops.callback;
   impl_->callback_queue_ = ops.callback_queue;
@@ -104,47 +88,34 @@ WallTimer::WallTimer(const WallTimerOptions& ops)
   impl_->oneshot_ = ops.oneshot;
 }
 
-WallTimer::WallTimer(const WallTimer& rhs)
-{
-  impl_ = rhs.impl_;
-}
+WallTimer::WallTimer(const WallTimer& rhs) { impl_ = rhs.impl_; }
 
-WallTimer::~WallTimer()
-{
-}
+WallTimer::~WallTimer() {}
 
-void WallTimer::start()
-{
-  if (impl_)
-  {
+void WallTimer::start() {
+  if (impl_) {
     impl_->start();
   }
 }
 
-void WallTimer::stop()
-{
-  if (impl_)
-  {
+void WallTimer::stop() {
+  if (impl_) {
     impl_->stop();
   }
 }
 
-bool WallTimer::hasPending()
-{
-  if (impl_)
-  {
+bool WallTimer::hasPending() {
+  if (impl_) {
     return impl_->hasPending();
   }
 
   return false;
 }
 
-void WallTimer::setPeriod(const WallDuration& period, bool reset)
-{
-  if (impl_)
-  {
+void WallTimer::setPeriod(const WallDuration& period, bool reset) {
+  if (impl_) {
     impl_->setPeriod(period, reset);
   }
 }
 
-}
+}  // namespace ros

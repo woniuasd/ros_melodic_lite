@@ -28,7 +28,8 @@ endmacro()
 
 foreach(dir
     listener
-    talker
+    talker1
+    talker2
     )
   rostutorial(${dir})
 endforeach()

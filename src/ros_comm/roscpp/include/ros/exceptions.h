@@ -8,9 +8,9 @@
  *   * Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
- *   * Neither the names of Stanford University or Willow Garage, Inc. nor the names of its
- *     contributors may be used to endorse or promote products derived from
- *     this software without specific prior written permission.
+ *   * Neither the names of Stanford University or Willow Garage, Inc. nor the
+ * names of its contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -30,67 +30,51 @@
 
 #include <ros/exception.h>
 
-namespace ros
-{
+namespace ros {
 
 /**
  * \brief Thrown when an invalid node name is specified to ros::init()
  */
-class InvalidNodeNameException : public ros::Exception
-{
-public:
+class InvalidNodeNameException : public ros::Exception {
+ public:
   InvalidNodeNameException(const std::string& name, const std::string& reason)
-  : Exception("Invalid node name [" + name + "]: " + reason)
-  {}
+      : Exception("Invalid node name [" + name + "]: " + reason) {}
 };
 
 /**
  * \brief Thrown when an invalid graph resource name is specified to any roscpp
  * function.
  */
-class InvalidNameException : public ros::Exception
-{
-public:
-  InvalidNameException(const std::string& msg)
-  : Exception(msg)
-  {}
+class InvalidNameException : public ros::Exception {
+ public:
+  InvalidNameException(const std::string& msg) : Exception(msg) {}
 };
 
 /**
- * \brief Thrown when a second (third,...) subscription is attempted with conflicting
- * arguments.
+ * \brief Thrown when a second (third,...) subscription is attempted with
+ * conflicting arguments.
  */
-class ConflictingSubscriptionException : public ros::Exception
-{
-public:
-  ConflictingSubscriptionException(const std::string& msg)
-  : Exception(msg)
-  {}
+class ConflictingSubscriptionException : public ros::Exception {
+ public:
+  ConflictingSubscriptionException(const std::string& msg) : Exception(msg) {}
 };
 
 /**
  * \brief Thrown when an invalid parameter is passed to a method
  */
-class InvalidParameterException : public ros::Exception
-{
-public:
-  InvalidParameterException(const std::string& msg)
-  : Exception(msg)
-  {}
+class InvalidParameterException : public ros::Exception {
+ public:
+  InvalidParameterException(const std::string& msg) : Exception(msg) {}
 };
 
 /**
  * \brief Thrown when an invalid port is specified
  */
-class InvalidPortException : public ros::Exception
-{
-public:
-  InvalidPortException(const std::string& msg)
-  : Exception(msg)
-  {}
+class InvalidPortException : public ros::Exception {
+ public:
+  InvalidPortException(const std::string& msg) : Exception(msg) {}
 };
 
-} // namespace ros
+}  // namespace ros
 
 #endif
-
